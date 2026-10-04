@@ -1,0 +1,1025 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#0d0b16">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="جارویس">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>دستیار جارویس</title>
+<style>
+:root{
+  --h:270;
+  --bg:#0d0b16; --panel:#1a1628; --panel2:#251f3a; --text:#f2eefc; --dim:#9d95ba;
+  --c:hsl(var(--h) 90% 68%); --cd:hsl(var(--h) 60% 48%);
+  --bad:#ff5d73; --ok:#3ddc97;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+  font:16px/1.55 -apple-system,system-ui,"Vazirmatn","Segoe UI",Tahoma,sans-serif;overscroll-behavior:none}
+body{position:fixed;inset:0;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+#app{height:100dvh;display:flex;flex-direction:column;padding-top:var(--sat);
+  background:radial-gradient(90% 42% at 50% 30%,hsl(var(--h) 40% 17% / .55),transparent 72%),var(--bg)}
+header{display:flex;align-items:center;gap:8px;padding:8px 14px 0;min-height:48px}
+header .dot{width:8px;height:8px;border-radius:50%;background:#4a4562;transition:.3s}
+header.on .dot{background:var(--ok)}
+header h1{font-size:15px;font-weight:600;margin:0;flex:1;color:var(--dim)}
+.ib{width:40px;height:40px;border-radius:13px;border:0;background:var(--panel2);
+  display:grid;place-items:center;cursor:pointer;color:#1b1330;flex:0 0 auto}
+.ib:active{transform:scale(.93)}
+.ib svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ib.y{background:#facc15}.ib.t{background:#2dd4bf}.ib.v{background:#a5a0ff}.ib.x{background:var(--panel2);color:var(--text)}
+#stage{position:relative;flex:0 0 auto;height:clamp(230px,40dvh,380px);touch-action:manipulation}
+#orb{display:block;width:100%;height:100%}
+#status{position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:12.5px;color:var(--dim);min-height:18px;pointer-events:none}
+#log{flex:1;min-height:80px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 14px 6px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:88%;padding:9px 13px;border-radius:18px;background:var(--panel);
+  white-space:pre-wrap;word-break:break-word;font-size:15px}
+.msg.u{align-self:flex-start;background:#2c2552;border-bottom-right-radius:6px}
+.msg.a{align-self:flex-end;background:hsl(var(--h) 38% 22%);border-bottom-left-radius:6px}
+.msg.s{align-self:center;max-width:94%;font-size:12.5px;color:var(--dim);background:transparent;text-align:center}
+.msg.err{color:var(--bad)}
+.msg img{display:block;max-width:100%;border-radius:12px}
+.msg a{color:#fff}
+.openbtn,.gbtn{display:inline-block;margin-top:2px;padding:8px 14px;border-radius:12px;background:var(--c);color:#170f2b!important;font-weight:600;text-decoration:none;border:0;font-size:14px;cursor:pointer}
+.gbtn{margin-top:8px;background:#a66cff;color:#fff!important}
+.card{align-self:flex-end;border-radius:18px;padding:12px 14px;min-width:62%;background:linear-gradient(160deg,#2a4a8a,#3b2f7a)}
+.card b{font-size:22px}
+.card .row{display:flex;justify-content:space-between;color:#d9d3f2;font-size:13px;margin-top:4px;gap:10px}
+.empty{margin:auto;text-align:center;color:var(--dim);font-size:14px;padding:0 24px}
+.empty b{color:var(--text)}
+#chips{display:flex;gap:8px;overflow-x:auto;padding:6px 12px 4px;scrollbar-width:none;flex:0 0 auto}
+#chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:0;border-radius:999px;padding:8px 14px;background:var(--cc);color:#150f26;font-weight:700;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.chip:active{transform:scale(.95)}
+#bar{display:flex;align-items:flex-end;gap:8px;padding:6px 12px calc(10px + var(--sab));background:transparent}
+#txt{flex:1;resize:none;max-height:110px;min-height:46px;border-radius:23px;border:0;background:var(--panel);padding:11px 16px;outline:none}
+#txt:focus{box-shadow:0 0 0 2px var(--cd)}
+#mic{width:60px;height:60px;border-radius:50%;border:0;background:linear-gradient(145deg,#ff5fa2,#8f5bff);color:#fff;
+  display:grid;place-items:center;cursor:pointer;flex:0 0 auto;box-shadow:0 6px 18px rgba(143,91,255,.35);transition:.2s}
+#mic svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#mic.live{background:linear-gradient(145deg,#ff4d6d,#ff8a3d);animation:pulse 1.6s infinite}
+#mic:active{transform:scale(.94)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,100,100,.45)}70%{box-shadow:0 0 0 16px transparent}100%{box-shadow:0 0 0 0 transparent}}
+#send{display:none;background:#3b82f6;color:#fff}
+#btnMute{background:#ef4444;color:#fff}
+#btnMute.warn{background:#7f1d1d}
+#bar.typing #send{display:grid}
+#bar.typing #mic{display:none}
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.55);display:none;align-items:flex-end}
+.sheet.open{display:flex}
+.sheet .in{width:100%;max-height:88dvh;overflow-y:auto;background:var(--panel);border-radius:24px 24px 0 0;padding:16px 16px calc(24px + var(--sab))}
+.sheet h2{margin:0 0 12px;font-size:17px;display:flex;align-items:center;justify-content:space-between}
+label{display:block;font-size:13px;color:var(--dim);margin:14px 0 5px}
+.f{width:100%;border-radius:12px;border:0;background:var(--bg);padding:10px 12px;outline:none;direction:ltr;text-align:left}
+.f.rtl{direction:rtl;text-align:right}
+.f:focus{box-shadow:0 0 0 2px var(--cd)}
+input[type=range]{width:100%;accent-color:var(--c)}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;font-size:14px}
+.sw small{display:block;color:var(--dim);font-size:12px}
+.sw input{width:22px;height:22px;accent-color:var(--c)}
+.btn{border:0;background:var(--panel2);border-radius:12px;padding:10px 14px;cursor:pointer}
+.btn.pri{background:var(--c);color:#170f2b;font-weight:700}
+.btn.bad{background:#ef4444;color:#fff}
+.btn.big{display:block;width:100%;padding:14px;font-weight:700;background:var(--cc,var(--c));color:#170f2b;font-size:15px;margin-top:10px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.row2{display:flex;gap:8px}
+.mem{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #2c2645;font-size:14px}
+.mem span{flex:1;word-break:break-word}.mem small{color:var(--dim)}
+.mem button{background:none;border:0;color:var(--bad);font-size:20px;line-height:1;padding:2px 8px;cursor:pointer}
+.mem input{width:20px;height:20px;accent-color:var(--c);margin-top:4px}
+.mem.done span{text-decoration:line-through;color:var(--dim)}
+h3{font-size:14px;color:var(--dim);margin:16px 0 4px}
+#appGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.app{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 2px;border-radius:16px;background:var(--ac);color:#150f26;text-decoration:none;font-size:11.5px;font-weight:700;text-align:center}
+.app span{font-size:24px;line-height:1}
+.app:active{transform:scale(.94)}
+#toast{position:fixed;top:calc(var(--sat) + 56px);left:50%;transform:translate(-50%,-20px);opacity:0;pointer-events:none;
+  background:var(--panel2);padding:9px 16px;border-radius:14px;z-index:40;transition:.25s;max-width:90%;font-size:14px;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#install{margin:4px 14px 0;padding:8px 12px;background:var(--panel);border-radius:12px;font-size:12.5px;color:var(--dim);display:none}
+#install button{float:left;background:none;border:0;color:var(--dim);font-size:18px;line-height:1}
+.help{font-size:13px;color:var(--dim);line-height:1.8}
+.help a{color:var(--c)}
+</style>
+<script src="char.js"></script>
+</head>
+<body>
+<div id="app">
+  <header id="hd">
+    <span class="dot"></span>
+    <h1 id="title">جارویس</h1>
+    <button class="ib y" id="btnMem" aria-label="حافظه"><svg viewBox="0 0 24 24"><path d="M12 3a4 4 0 0 0-4 4 4 4 0 0 0-3 6.5A4 4 0 0 0 8 20h1V3.2M12 3a4 4 0 0 1 4 4 4 4 0 0 1 3 6.5A4 4 0 0 1 16 20h-1V3.2M12 3v17"/></svg></button>
+    <button class="ib t" id="btnLists" aria-label="کارها و یادداشت‌ها"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></button>
+    <button class="ib v" id="btnSet" aria-label="تنظیمات"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </header>
+  <div id="install"><button id="instX" aria-label="بستن">×</button>برای تجربه‌ی بهتر (تمام‌صفحه): در Safari دکمه‌ی <b>Share</b> را بزن و <b>Add to Home Screen</b> را انتخاب کن.</div>
+  <div id="stage"><canvas id="orb"></canvas><div id="status">آماده</div></div>
+  <div id="log"></div>
+  <div id="chips">
+    <button class="chip" style="--cc:#34d399" data-a="cam">📷 دوربین</button>
+    <button class="chip" style="--cc:#fb923c" data-a="screen">🖥 صفحه</button>
+    <button class="chip" style="--cc:#c084fc" data-a="img">🎨 تصویر بساز</button>
+    <button class="chip" style="--cc:#38bdf8" data-a="gallery">🖼 عکس</button>
+    <button class="chip" style="--cc:#f472b6" data-a="open">🚀 برنامه‌ها</button>
+    <button class="chip" style="--cc:#fde047" data-a="weather">🌤 هوا</button>
+    <button class="chip" style="--cc:#2dd4bf" data-a="lists">📝 کارها</button>
+    <button class="chip" style="--cc:#fb7185" data-a="timer">⏱ تایمر</button>
+  </div>
+  <div id="bar">
+    <button class="ib" id="btnMute" aria-label="قطع میکروفون" style="display:none"><svg viewBox="0 0 24 24"><path d="M1 1l22 22M9 9v3a3 3 0 0 0 5.1 2.1M15 9.3V4a3 3 0 0 0-5.9-.8M17 16.9A7 7 0 0 1 5 12v-2M19 10v2a7 7 0 0 1-.1 1.2M12 19v4M8 23h8"/></svg></button>
+    <textarea id="txt" rows="1" placeholder="بنویس یا میکروفون رو بزن…" dir="auto" enterkeyhint="send"></textarea>
+    <button class="ib" id="send" aria-label="ارسال" style="width:46px;height:46px;border-radius:50%"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></button>
+    <button id="mic" aria-label="شروع گفتگوی صوتی"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></button>
+  </div>
+</div>
+<input type="file" id="file" accept="image/*" hidden>
+
+<div class="sheet" id="shSet"><div class="in">
+  <h2>تنظیمات <button class="ib x" data-close>✕</button></h2>
+  <label>کلید Gemini API</label>
+  <input class="f" id="sKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="AIza…">
+  <div class="help" style="margin-top:6px">رایگان از <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> بگیر. کلید فقط روی همین گوشی ذخیره می‌شه.</div>
+  <label>اسم دستیار</label><input class="f rtl" id="sName">
+  <label>اسم تو (برای خطاب کردن)</label><input class="f rtl" id="sUser" placeholder="اختیاری">
+  <label>صدا</label>
+  <select class="f" id="sVoice"></select>
+  <label>رنگ رابط و چشم‌ها</label><input type="range" id="sHue" min="0" max="360">
+  <label>رنگ موی کاراکتر</label><input type="range" id="sHair" min="0" max="360">
+  <div class="sw"><div>اجازه‌ی وسط‌پریدن<small>فقط با هدفون روشن کن؛ با بلندگوی گوشی صدای خودش رو می‌شنوه</small></div><input type="checkbox" id="sInt"></div>
+  <div class="sw"><div>خواندن پاسخ در حالت متنی<small>وقتی گفتگوی صوتی روشن نیست</small></div><input type="checkbox" id="sTts"></div>
+  <details style="margin-top:14px"><summary class="help">پیشرفته</summary>
+    <label>مدل Live</label><input class="f" id="sModel">
+    <label>مدل متنی</label><input class="f" id="sTModel">
+    <label>مدل تولید تصویر</label><input class="f" id="sIModel">
+    <label>اسم شورتکات بازکننده‌ی برنامه (برای برنامه‌هایی که لینک ندارن)</label><input class="f" id="sShortcut">
+  </details>
+  <div class="btns">
+    <button class="btn pri" id="sSave">ذخیره</button>
+    <button class="btn" id="sClear">پاک کردن گفتگو</button>
+  </div>
+</div></div>
+
+<div class="sheet" id="shMem"><div class="in">
+  <h2>چیزهایی که یادم هست <button class="ib x" data-close>✕</button></h2>
+  <div id="memList"></div>
+  <div class="btns"><button class="btn bad" id="memWipe">پاک کردن همه</button></div>
+</div></div>
+
+<div class="sheet" id="shLists"><div class="in">
+  <h2>کارها و یادداشت‌ها <button class="ib x" data-close>✕</button></h2>
+  <div class="row2"><input class="f rtl" id="listIn" placeholder="چیزی بنویس…"></div>
+  <div class="btns" style="margin-top:8px"><button class="btn pri" id="addTask">+ کار</button><button class="btn" id="addNote" style="background:#2dd4bf;color:#06201c;font-weight:700">+ یادداشت</button></div>
+  <h3>کارها</h3><div id="taskList"></div>
+  <h3>یادداشت‌ها</h3><div id="noteList"></div>
+</div></div>
+
+<div class="sheet" id="shApps"><div class="in">
+  <h2>باز کردن برنامه <button class="ib x" data-close>✕</button></h2>
+  <div id="appGrid"></div>
+  <label>برنامه‌ی دیگه (از طریق شورتکات)</label>
+  <div class="row2"><input class="f rtl" id="appName" placeholder="اسم برنامه"><button class="btn pri" id="appRun">باز کن</button></div>
+  <div class="help" style="margin-top:10px">آیفون هر بار برای باز کردن برنامه تأیید می‌گیره. چیزی باز نشد؟ یعنی اون برنامه نصب نیست یا لینکش فرق داره.</div>
+</div></div>
+
+<div class="sheet" id="shScreen"><div class="in">
+  <h2>نشون دادن صفحه‌ی گوشی <button class="ib x" data-close>✕</button></h2>
+  <div class="help">آیفون به مرورگر اجازه‌ی ضبط صفحه نمی‌ده، پس راهش اسکرین‌شاته:<br>۱) هر صفحه‌ای رو که می‌خوای باز کن و اسکرین‌شات بگیر (دکمه‌ی کناری + افزایش صدا).<br>۲) برگرد اینجا و یکی از دکمه‌های پایین رو بزن؛ بعدش بپرس چی می‌خوای.</div>
+  <button class="btn big" style="--cc:#fb923c" id="scPaste">📋 چسباندن اسکرین‌شات کپی‌شده</button>
+  <button class="btn big" style="--cc:#38bdf8" id="scPick">🖼 انتخاب آخرین اسکرین‌شات از گالری</button>
+  <button class="btn big" style="--cc:#34d399;display:none" id="scLive">📺 ضبط زنده‌ی صفحه (دسکتاپ/اندروید)</button>
+  <div class="help" style="margin-top:12px">برای خودکار شدن: توی README یه شورتکات + Back Tap توضیح دادم که با دو بار ضربه روی پشت گوشی اسکرین‌شات بگیره و بیاد اینجا.</div>
+</div></div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ───────── helpers ───────── */
+const $ = s => document.querySelector(s);
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const toB64 = u8 => { let s = ''; const C = 0x8000; for(let i = 0; i < u8.length; i += C) s += String.fromCharCode.apply(null, u8.subarray(i, i + C)); return btoa(s); };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const enc = encodeURIComponent;
+const VOICES = ['Charon','Puck','Kore','Fenrir','Aoede'];
+const WS_BASE = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent';
+
+/* ───────── settings ───────── */
+const DEF = { key:'', name:'جارویس', user:'', voice:'Charon', hue:270, hair:325, model:'gemini-3.8-live', tmodel:'gemini-3.8-flash',
+  imodel:'gemini-2.5-flash-image', shortcut:'OpenApp', interrupt:false, tts:true, ver:3 };
+const S = Object.assign({}, DEF, LS.get('jv_settings', {}));
+const saveS = () => LS.set('jv_settings', S);
+if(S.ver !== 3){ S.hue = DEF.hue; S.hair = DEF.hair; S.ver = 3; saveS(); }
+const prev = { hue:null, hair:null };
+function applyTheme(h){ document.documentElement.style.setProperty('--h', h == null ? S.hue : h); $('#title').textContent = S.name; }
+
+/* ───────── memory ───────── */
+const Mem = {
+  data: LS.get('jv_mem', {}),
+  save(){ LS.set('jv_mem', this.data); },
+  set(cat, key, value){ (this.data[cat] = this.data[cat] || {})[key] = { value: String(value), ts: Date.now() }; this.save(); },
+  del(cat, key){ if(this.data[cat]){ delete this.data[cat][key]; if(!Object.keys(this.data[cat]).length) delete this.data[cat]; this.save(); } },
+  all(){ const o = []; for(const c in this.data) for(const k in this.data[c]) o.push({ c, k, v: this.data[c][k].value, ts: this.data[c][k].ts }); return o.sort((a,b) => b.ts - a.ts); },
+  search(q){ q = String(q || '').toLowerCase(); const w = q.split(/\s+/).filter(Boolean);
+    return this.all().filter(m => !w.length || w.some(x => (m.c + ' ' + m.k + ' ' + m.v).toLowerCase().includes(x))); },
+  prompt(){
+    const items = this.all(); if(!items.length) return '';
+    let out = '[MEMORY — what you know about the user]\n', rest = [];
+    for(const m of items){ const line = `- (${m.c}) ${m.k}: ${m.v}\n`; if(out.length + line.length < 3000) out += line; else rest.push(m.k); }
+    if(rest.length) out += `[ALSO REMEMBERED, not shown — call recall_memory to look up]\n${rest.join(', ')}\n`;
+    return out;
+  }
+};
+
+/* ───────── tasks & notes ───────── */
+const Lists = {
+  d: Object.assign({ tasks:[], notes:[] }, LS.get('jv_lists', {})),
+  save(){ LS.set('jv_lists', this.d); },
+  id(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 5); },
+  find(arr, q){ q = String(q || '').trim().toLowerCase(); if(!q) return null; return arr.find(x => x.id === q) || arr.find(x => x.t.toLowerCase() === q) || arr.find(x => x.t.toLowerCase().includes(q) || q.includes(x.t.toLowerCase())) || null; }
+};
+
+/* ───────── apps ───────── */
+const APPS = {
+  whatsapp:{ n:'واتساپ', e:'💬', c:'#25d366', u:'whatsapp://', q:t => 'whatsapp://send?text=' + enc(t), al:['whatsapp','واتساپ','واتس‌اپ','واتساب','واتس اپ'] },
+  telegram:{ n:'تلگرام', e:'✈️', c:'#2aabee', u:'tg://', al:['telegram','تلگرام'] },
+  instagram:{ n:'اینستاگرام', e:'📸', c:'#ff5c93', u:'instagram://app', al:['instagram','اینستاگرام','اینستا'] },
+  youtube:{ n:'یوتیوب', e:'▶️', c:'#ff5a5f', u:'youtube://', q:t => 'https://www.youtube.com/results?search_query=' + enc(t), al:['youtube','یوتیوب','یوتوب'] },
+  gmaps:{ n:'گوگل مپ', e:'📍', c:'#6ea8ff', u:'comgooglemaps://', q:t => 'comgooglemaps://?q=' + enc(t), al:['google maps','گوگل مپ','گوگل‌مپ'] },
+  maps:{ n:'نقشه', e:'🗺️', c:'#4ade80', u:'maps://', q:t => 'maps://?q=' + enc(t), al:['maps','apple maps','نقشه','مپ'] },
+  music:{ n:'اپل موزیک', e:'🎵', c:'#ff6b81', u:'music://', al:['apple music','music','موزیک','اپل موزیک'] },
+  spotify:{ n:'اسپاتیفای', e:'🎧', c:'#34d27b', u:'spotify://', q:t => 'spotify:search:' + enc(t), al:['spotify','اسپاتیفای'] },
+  safari:{ n:'سافاری', e:'🧭', c:'#60a5fa', u:'x-web-search://', al:['safari','سافاری','مرورگر'] },
+  chrome:{ n:'کروم', e:'🌐', c:'#fbbf24', u:'googlechrome://', al:['chrome','کروم'] },
+  messages:{ n:'پیام‌ها', e:'💭', c:'#4ade80', u:'sms://', al:['messages','imessage','sms','پیام','پیامک','پیام‌ها'] },
+  mail:{ n:'ایمیل', e:'✉️', c:'#60a5fa', u:'message://', al:['mail','ایمیل','میل'] },
+  gmail:{ n:'جیمیل', e:'📧', c:'#f87171', u:'googlegmail://', al:['gmail','جیمیل'] },
+  facetime:{ n:'فیس‌تایم', e:'📹', c:'#4ade80', u:'facetime://', al:['facetime','فیس تایم','فیس‌تایم'] },
+  notes:{ n:'یادداشت اپل', e:'🗒️', c:'#fde047', u:'mobilenotes://', al:['notes','apple notes','یادداشت اپل'] },
+  photos:{ n:'عکس‌ها', e:'🖼️', c:'#fdba74', u:'photos-redirect://', al:['photos','gallery','عکس‌ها','گالری'] },
+  calendar:{ n:'تقویم', e:'📅', c:'#fca5a5', u:'calshow://', al:['calendar','تقویم'] },
+  reminders:{ n:'یادآورها', e:'🔔', c:'#fdba74', u:'x-apple-reminderkit://', al:['reminders','یادآور','یادآورها'] },
+  files:{ n:'فایل‌ها', e:'📁', c:'#7dd3fc', u:'shareddocuments://', al:['files','فایل','فایل‌ها'] },
+  shortcuts:{ n:'شورتکات‌ها', e:'⚡', c:'#d8b4fe', u:'shortcuts://', al:['shortcuts','شورتکات','شورتکات‌ها'] },
+  settings:{ n:'تنظیمات', e:'⚙️', c:'#c4c0d8', u:'App-Prefs:', al:['settings','تنظیمات'] },
+  appstore:{ n:'اپ استور', e:'🅰️', c:'#60a5fa', u:'itms-apps://', al:['app store','appstore','اپ استور'] },
+  health:{ n:'سلامت', e:'❤️', c:'#fb7185', u:'x-apple-health://', al:['health','سلامت'] },
+  wallet:{ n:'کیف پول', e:'👛', c:'#a3e635', u:'shoebox://', al:['wallet','کیف پول'] },
+  x:{ n:'ایکس', e:'✖️', c:'#e5e7eb', u:'twitter://', al:['twitter','x','توییتر','ایکس'] },
+  tiktok:{ n:'تیک‌تاک', e:'🎬', c:'#67e8f9', u:'tiktok://', al:['tiktok','تیک تاک','تیک‌تاک'] },
+  snapchat:{ n:'اسنپ‌چت', e:'👻', c:'#fef08a', u:'snapchat://', al:['snapchat','اسنپ چت','اسنپ‌چت'] },
+  linkedin:{ n:'لینکدین', e:'💼', c:'#93c5fd', u:'linkedin://', al:['linkedin','لینکدین'] },
+  discord:{ n:'دیسکورد', e:'🎮', c:'#a5b4fc', u:'discord://', al:['discord','دیسکورد'] },
+  netflix:{ n:'نتفلیکس', e:'🍿', c:'#f87171', u:'nflx://', al:['netflix','نتفلیکس'] },
+  uber:{ n:'اوبر', e:'🚕', c:'#d1d5db', u:'uber://', al:['uber','اوبر'] }
+};
+const normApp = s => String(s || '').toLowerCase().replace(/[\s‌\-_.]/g, '');
+function findApp(q){
+  q = normApp(q); if(!q) return null;
+  for(const k in APPS){ const a = APPS[k]; if([k, a.n, ...a.al].some(x => normApp(x) === q)) return Object.assign({ k }, a); }
+  for(const k in APPS){ const a = APPS[k]; if([k, a.n, ...a.al].some(x => { x = normApp(x); return x.length > 2 && (q.includes(x) || (q.length > 2 && x.includes(q))); })) return Object.assign({ k }, a); }
+  return null;
+}
+
+/* ───────── geolocation ───────── */
+function getPos(){
+  return new Promise((res, rej) => {
+    if(!navigator.geolocation) return rej(new Error('geolocation unavailable'));
+    navigator.geolocation.getCurrentPosition(p => res(p.coords), e => rej(new Error('location permission denied')), { timeout:10000, maximumAge:600000 });
+  });
+}
+async function placeName(lat, lon){
+  try{
+    const j = await (await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`)).json();
+    return [j.city || j.locality, j.countryName].filter(Boolean).join(', ');
+  }catch(e){ return ''; }
+}
+
+/* ───────── tool declarations ───────── */
+const DECLS = [
+  { name:'save_memory', description:'Silently store a lasting fact or preference about the user (name, family, projects, likes, language). Do not announce it.',
+    parameters:{ type:'OBJECT', properties:{ category:{type:'STRING', description:'identity, preferences, projects, relationships, notes'}, key:{type:'STRING', description:'short English key'}, value:{type:'STRING'} }, required:['key','value'] } },
+  { name:'recall_memory', description:'Search stored memory for a name or topic that is not visible in the memory block.',
+    parameters:{ type:'OBJECT', properties:{ query:{type:'STRING'} }, required:['query'] } },
+  { name:'get_weather', description:'Current weather and 3-day forecast. Pass the city name in English, or omit city to use the phone location.',
+    parameters:{ type:'OBJECT', properties:{ city:{type:'STRING'} } } },
+  { name:'get_location', description:'Where the user is right now (coordinates and place name) from the phone GPS.', parameters:{ type:'OBJECT', properties:{} } },
+  { name:'get_datetime', description:'Current local date and time on the phone.', parameters:{ type:'OBJECT', properties:{} } },
+  { name:'set_timer', description:'Start a countdown timer or reminder inside this app. It only rings while the app stays open.',
+    parameters:{ type:'OBJECT', properties:{ seconds:{type:'NUMBER'}, label:{type:'STRING', description:'what it is for'} }, required:['seconds'] } },
+  { name:'look_with_camera', description:'Take one photo with the phone camera and look at it. Use when the user asks you to look at something, read something, or see their surroundings.',
+    parameters:{ type:'OBJECT', properties:{ facing:{type:'STRING', description:'environment (rear, default) or user (selfie)'} } } },
+  { name:'look_at_screen', description:"Look at the user's phone screen. iOS cannot record the screen from a web app, so this opens a panel where the user pastes or picks a screenshot; the image then arrives in the conversation. Tell the user in one sentence to take a screenshot and tap a button.",
+    parameters:{ type:'OBJECT', properties:{} } },
+  { name:'generate_image', description:'Create a brand-new picture from a text description (illustration, photo-style, logo idea, wallpaper...). Write the prompt in English with concrete detail. The image appears in the chat.',
+    parameters:{ type:'OBJECT', properties:{ prompt:{type:'STRING', description:'detailed English description of the image'} }, required:['prompt'] } },
+  { name:'open_app', description:'Open an app on the iPhone by name (WhatsApp, Telegram, Instagram, YouTube, Maps, Spotify, Notes, Settings, Mail, Camera-less apps...). Optional query for search-capable apps (YouTube, Maps, Spotify, WhatsApp text). The phone asks the user to confirm and a tap button is also shown.',
+    parameters:{ type:'OBJECT', properties:{ app:{type:'STRING'}, query:{type:'STRING', description:'optional search text or message text'} }, required:['app'] } },
+  { name:'run_shortcut', description:'Run an iPhone Shortcut by exact name, optionally with a text input. This is the bridge to Siri-style automation: anything the user built in the Shortcuts app (open any app, control Home, send a message, toggle settings) can be triggered. Only works if that shortcut exists.',
+    parameters:{ type:'OBJECT', properties:{ name:{type:'STRING'}, input:{type:'STRING'} }, required:['name'] } },
+  { name:'make_call', description:'Prepare a phone call to a number (the user taps to confirm).', parameters:{ type:'OBJECT', properties:{ number:{type:'STRING'} }, required:['number'] } },
+  { name:'send_sms', description:'Prepare a text message (Messages app opens with the text filled in; the user taps send).',
+    parameters:{ type:'OBJECT', properties:{ number:{type:'STRING'}, text:{type:'STRING'} }, required:['number'] } },
+  { name:'send_email', description:'Prepare an email in the Mail app (the user taps send).',
+    parameters:{ type:'OBJECT', properties:{ to:{type:'STRING'}, subject:{type:'STRING'}, body:{type:'STRING'} }, required:['to'] } },
+  { name:'navigate_to', description:'Start navigation / show a place in Apple Maps. Pass a destination or a search such as "pharmacy near me".',
+    parameters:{ type:'OBJECT', properties:{ destination:{type:'STRING'}, mode:{type:'STRING', description:'driving (default), walking or transit'} }, required:['destination'] } },
+  { name:'search_youtube', description:'Open a YouTube search (play music, videos, tutorials).', parameters:{ type:'OBJECT', properties:{ query:{type:'STRING'} }, required:['query'] } },
+  { name:'show_link', description:'Show a tappable link in the chat. The phone cannot open pages by itself, so give the user the link to tap.',
+    parameters:{ type:'OBJECT', properties:{ url:{type:'STRING'}, title:{type:'STRING'} }, required:['url'] } },
+  { name:'copy_to_clipboard', description:'Put text on the phone clipboard (a copy button is shown if iOS blocks it).', parameters:{ type:'OBJECT', properties:{ text:{type:'STRING'} }, required:['text'] } },
+  { name:'share_text', description:'Show a share button for some text (the user picks the app).', parameters:{ type:'OBJECT', properties:{ text:{type:'STRING'} }, required:['text'] } },
+  { name:'add_task', description:'Add an item to the user to-do list.', parameters:{ type:'OBJECT', properties:{ text:{type:'STRING'} }, required:['text'] } },
+  { name:'list_tasks', description:'Read the to-do list.', parameters:{ type:'OBJECT', properties:{} } },
+  { name:'complete_task', description:'Mark a to-do item done (match by words from its text).', parameters:{ type:'OBJECT', properties:{ text:{type:'STRING'} }, required:['text'] } },
+  { name:'add_note', description:'Save a note for the user.', parameters:{ type:'OBJECT', properties:{ text:{type:'STRING'} }, required:['text'] } },
+  { name:'list_notes', description:'Read the saved notes.', parameters:{ type:'OBJECT', properties:{} } },
+  { name:'delete_note', description:'Delete a note (match by words from its text).', parameters:{ type:'OBJECT', properties:{ text:{type:'STRING'} }, required:['text'] } },
+  { name:'calculate', description:'Exact arithmetic. Pass an expression like (12.5*4)/3.', parameters:{ type:'OBJECT', properties:{ expression:{type:'STRING'} }, required:['expression'] } },
+  { name:'convert_currency', description:'Convert money between currencies with current rates (ISO codes such as USD, EUR, GBP, TRY, AED).',
+    parameters:{ type:'OBJECT', properties:{ amount:{type:'NUMBER'}, from:{type:'STRING'}, to:{type:'STRING'} }, required:['amount','from','to'] } },
+  { name:'set_theme', description:'Change the interface colour and/or the character hair colour. Hue is 0-360 (0 red, 40 orange, 120 green, 190 cyan, 270 violet, 320 pink).',
+    parameters:{ type:'OBJECT', properties:{ hue:{type:'NUMBER'}, hair_hue:{type:'NUMBER'} } } }
+];
+const DECL_SEARCH = { name:'web_search', description:'Search the web (Google) for current facts, news, prices, sports and anything that may have changed. Returns a short answer.',
+  parameters:{ type:'OBJECT', properties:{ query:{type:'STRING'} }, required:['query'] } };
+const DECLS_T = DECLS.concat([DECL_SEARCH]);
+
+const WX = { 0:['☀️','clear'],1:['🌤️','mostly clear'],2:['⛅','partly cloudy'],3:['☁️','overcast'],45:['🌫️','fog'],48:['🌫️','fog'],51:['🌦️','light drizzle'],53:['🌦️','drizzle'],55:['🌧️','heavy drizzle'],
+  61:['🌧️','light rain'],63:['🌧️','rain'],65:['🌧️','heavy rain'],71:['🌨️','light snow'],73:['🌨️','snow'],75:['❄️','heavy snow'],80:['🌦️','showers'],81:['🌧️','showers'],82:['⛈️','violent showers'],95:['⛈️','thunderstorm'],96:['⛈️','thunderstorm, hail'],99:['⛈️','thunderstorm, hail'] };
+const faDigits = s => String(s).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+
+/* ───────── link / action cards ───────── */
+function linkCard(url, label, auto){
+  const el = addMsg('a', ''); const a = document.createElement('a'); a.className = 'openbtn'; a.href = url; a.textContent = '↗ ' + label;
+  const web = /^https?:/i.test(url); if(web){ a.target = '_blank'; a.rel = 'noopener'; }
+  el.appendChild(a); scrollLog();
+  if(auto && !web){ try{ location.href = url; }catch(e){} }
+}
+function actionCard(text, label, fn){
+  const el = addMsg('a', text); const b = document.createElement('button'); b.className = 'gbtn'; b.textContent = label; b.style.display = 'block';
+  b.onclick = async () => { try{ await fn(); toast('انجام شد'); }catch(e){ if(e && e.name !== 'AbortError') toast('نشد: ' + (e.message || e)); } };
+  el.appendChild(b); scrollLog();
+}
+function runShortcut(name, input){
+  if(!name) return { error:'no shortcut name' };
+  linkCard('shortcuts://run-shortcut?name=' + enc(name) + (input ? '&input=text&text=' + enc(input) : ''), 'اجرای شورتکات «' + name + '»', true);
+  return { ok:true, note:'Sent to the Shortcuts app. It only works if a shortcut with this exact name exists on the phone; iOS may ask for confirmation.' };
+}
+
+/* ───────── images: camera, screen, generated ───────── */
+function frameToB64(src, w, h, max){
+  const m = max || 896, k = Math.min(1, m / Math.max(w, h)); const c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+  c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', .74).split(',')[1];
+}
+async function captureCamera(facing){
+  let st;
+  try{ st = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ ideal:facing }, width:{ ideal:1280 } }, audio:false }); }
+  catch(e){ throw new Error('camera unavailable: ' + e.message); }
+  const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.srcObject = st; await v.play();
+  await sleep(700);
+  const b64 = frameToB64(v, v.videoWidth, v.videoHeight);
+  st.getTracks().forEach(t => t.stop());
+  addImg(b64);
+  return b64;
+}
+const canDisplay = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+async function captureDisplay(){
+  const st = await navigator.mediaDevices.getDisplayMedia({ video:true, audio:false });
+  const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.srcObject = st; await v.play(); await sleep(450);
+  const b64 = frameToB64(v, v.videoWidth, v.videoHeight, 1500);
+  st.getTracks().forEach(t => t.stop());
+  return b64;
+}
+function b64ToBlob(b64, mime){ const u = b64u8(b64); return new Blob([u], { type:mime }); }
+function b64u8(s){ const b = atob(s), a = new Uint8Array(b.length); for(let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
+function showGenImage(b64, mime){
+  clearEmpty();
+  const d = document.createElement('div'); d.className = 'msg a';
+  const i = new Image(); i.src = 'data:' + mime + ';base64,' + b64; d.appendChild(i);
+  const blob = b64ToBlob(b64, mime), ext = /jpe?g/.test(mime) ? 'jpg' : 'png', file = new File([blob], 'jarvis.' + ext, { type:mime });
+  const b = document.createElement('button'); b.className = 'gbtn'; b.textContent = '💾 ذخیره / اشتراک';
+  b.onclick = async () => {
+    try{ if(navigator.canShare && navigator.canShare({ files:[file] })){ await navigator.share({ files:[file] }); return; } }catch(e){ if(e.name === 'AbortError') return; }
+    const u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+  };
+  d.appendChild(b); logEl.appendChild(d); scrollLog();
+}
+let fileKind = 'photo';
+function deliverImage(b64, kind){
+  if(!S.key){ openSheet('shSet'); return; }
+  closeSheets(); addImg(b64);
+  const q = $('#txt').value.trim(); $('#txt').value = ''; $('#txt').style.height = ''; $('#bar').classList.remove('typing');
+  if(q) addMsg('u', q);
+  if(Live.ready){
+    Live.sendImage(b64);
+    const what = kind === 'screen' ? "a screenshot of the user's phone screen" : kind === 'camera' ? 'a photo from the phone camera' : 'a photo the user sent';
+    Live.sendText(`[system notice] The user just sent you ${what}. ${q ? 'They ask: ' + q : 'Say briefly what matters and offer help.'}`);
+  } else {
+    const lead = kind === 'screen' ? 'این اسکرین‌شات صفحه‌ی گوشی منه. ' : 'این عکس رو ببین. ';
+    textChat(lead + (q || 'بگو چیه و اگه لازمه کمکم کن.'), b64);
+  }
+}
+async function useBlob(blob, kind){
+  const bm = await createImageBitmap(blob).catch(() => null);
+  if(!bm) return toast('این تصویر خونده نشد');
+  deliverImage(frameToB64(bm, bm.width, bm.height, kind === 'screen' ? 1500 : 1000), kind);
+}
+async function pasteShot(){
+  try{
+    const items = await navigator.clipboard.read();
+    for(const it of items){ const ty = it.types.find(t => t.startsWith('image/')); if(ty) return useBlob(await it.getType(ty), 'screen'); }
+    toast('توی کلیپ‌بورد عکسی نیست؛ اسکرین‌شات رو اول کپی کن');
+  }catch(e){ toast('اجازه‌ی چسباندن داده نشد یا عکسی نیست'); }
+}
+function pickShot(kind){ fileKind = kind || 'photo'; $('#file').click(); }
+async function openScreen(){
+  if(canDisplay && !/iPhone|iPad/.test(navigator.userAgent)){
+    try{ deliverImage(await captureDisplay(), 'screen'); return; }catch(e){ /* fall through to the sheet */ }
+  }
+  openSheet('shScreen');
+}
+async function snapCamera(){
+  if(!S.key){ openSheet('shSet'); return; }
+  try{ const b64 = await captureCamera('environment'); const q = $('#txt').value.trim(); $('#txt').value = ''; $('#bar').classList.remove('typing');
+    if(q) addMsg('u', q);
+    if(Live.ready){ Live.sendImage(b64); Live.sendText(`[system notice] The user just took a camera photo. ${q ? 'They ask: ' + q : 'Describe what matters, briefly.'}`); }
+    else textChat('این عکس رو ببین. ' + (q || 'بگو چیه.'), b64);
+  }catch(e){ toast('دوربین در دسترس نیست'); }
+}
+
+/* ───────── tools ───────── */
+const timers = [];
+const TOOLS = {
+  save_memory({ category, key, value }){ if(!key || !value) return { error:'key and value required' }; Mem.set(category || 'notes', key, value); renderMem(); return { ok:true }; },
+  recall_memory({ query }){ const r = Mem.search(query).slice(0, 12); return { matches: r.map(m => ({ category:m.c, key:m.k, value:m.v })) }; },
+  get_datetime(){ const d = new Date(); return { iso:d.toISOString(), local:d.toLocaleString('en-GB', { dateStyle:'full', timeStyle:'short' }), timezone:Intl.DateTimeFormat().resolvedOptions().timeZone }; },
+  set_theme({ hue, hair_hue }){
+    if(hue != null && hue !== ''){ S.hue = ((+hue || 0) % 360 + 360) % 360; }
+    if(hair_hue != null && hair_hue !== ''){ S.hair = ((+hair_hue || 0) % 360 + 360) % 360; }
+    saveS(); applyTheme(); return { ok:true, hue:S.hue, hair_hue:S.hair };
+  },
+  show_link({ url, title }){
+    if(!/^https?:\/\//i.test(url || '')) return { error:'invalid url' };
+    linkCard(url, title || url, false); return { ok:true, shown:true };
+  },
+  set_timer({ seconds, label }){
+    seconds = Math.max(1, Math.min(86400, Math.round(+seconds || 0)));
+    const t = setTimeout(() => fireTimer(label), seconds * 1000); timers.push(t);
+    addMsg('s', `⏱️ تایمر ${seconds >= 60 ? Math.round(seconds / 6) / 10 + ' دقیقه' : seconds + ' ثانیه'}${label ? ' — ' + label : ''}`);
+    return { ok:true, rings_in_seconds:seconds, note:'Only rings while this app stays open.' };
+  },
+  async get_location(){
+    const c = await getPos(); const place = await placeName(c.latitude, c.longitude);
+    return { latitude:+c.latitude.toFixed(4), longitude:+c.longitude.toFixed(4), place };
+  },
+  async get_weather({ city }){
+    let p;
+    if(city){
+      const g = await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&name=' + enc(city))).json();
+      p = g.results && g.results[0]; if(!p) return { error:'city not found' };
+    } else {
+      const c = await getPos(); p = { latitude:c.latitude, longitude:c.longitude, name:(await placeName(c.latitude, c.longitude)) || 'Here', country:'' };
+    }
+    const w = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${p.latitude}&longitude=${p.longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=auto&forecast_days=3`)).json();
+    const c = w.current, d = w.daily, [ico, desc] = WX[c.weather_code] || ['🌡️', 'unknown'];
+    const el = document.createElement('div'); el.className = 'card';
+    el.innerHTML = `<div>${ico} <b>${Math.round(c.temperature_2m)}°</b> &nbsp;${p.name}</div><div class="row"><span>حس می‌شه ${Math.round(c.apparent_temperature)}°</span><span>رطوبت ${c.relative_humidity_2m}%</span><span>باد ${Math.round(c.wind_speed_10m)}</span></div>` +
+      d.time.map((t, i) => `<div class="row"><span>${new Date(t).toLocaleDateString('fa-IR', { weekday:'short', day:'numeric' })}</span><span>${(WX[d.weather_code[i]] || ['🌡️'])[0]}</span><span>${Math.round(d.temperature_2m_min[i])}° / ${Math.round(d.temperature_2m_max[i])}°</span><span>🌧 ${d.precipitation_probability_max[i] ?? 0}%</span></div>`).join('');
+    clearEmpty(); $('#log').appendChild(el); scrollLog();
+    return { place:`${p.name}${p.country ? ', ' + p.country : ''}`, now:{ temp_c:c.temperature_2m, feels_like_c:c.apparent_temperature, humidity:c.relative_humidity_2m, wind_kmh:c.wind_speed_10m, sky:desc },
+      forecast:d.time.map((t, i) => ({ date:t, min_c:d.temperature_2m_min[i], max_c:d.temperature_2m_max[i], rain_chance:d.precipitation_probability_max[i], sky:(WX[d.weather_code[i]] || [0, 'unknown'])[1] })) };
+  },
+  async look_with_camera({ facing }){
+    const b64 = await captureCamera(facing === 'user' ? 'user' : 'environment');
+    return { ok:true, _image:b64, note:'The photo was attached to the conversation. Describe or answer from it.' };
+  },
+  look_at_screen(){
+    openScreen();
+    return { ok:true, note:'A panel was opened asking the user to paste or pick a screenshot. The image will arrive as the next message; wait for it.' };
+  },
+  async generate_image({ prompt }){
+    if(!prompt) return { error:'prompt required' };
+    setState('drawing');
+    try{
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${S.imodel}:generateContent`, {
+        method:'POST', headers:{ 'Content-Type':'application/json', 'x-goog-api-key':S.key },
+        body:JSON.stringify({ contents:[{ parts:[{ text:prompt }] }], generationConfig:{ responseModalities:['TEXT', 'IMAGE'] } })
+      });
+      const j = await r.json().catch(() => ({}));
+      if(!r.ok) return { error:(j.error && j.error.message) || ('HTTP ' + r.status) };
+      const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
+      const img = parts.find(p => p.inlineData && p.inlineData.data);
+      if(!img) return { error:'no image returned: ' + (parts.map(p => p.text).filter(Boolean).join(' ').slice(0, 200) || (j.promptFeedback && j.promptFeedback.blockReason) || 'blocked or unsupported model') };
+      showGenImage(img.inlineData.data, img.inlineData.mimeType || 'image/png');
+      return { ok:true, shown:true, note:'The picture is already visible in the chat.' };
+    }finally{ setState('thinking'); }
+  },
+  open_app({ app, query }){
+    const a = findApp(app);
+    if(a){
+      const u = query && a.q ? a.q(query) : a.u;
+      linkCard(u, 'باز کردن ' + a.n, true);
+      return { ok:true, app:a.n, note:'The phone may ask the user to confirm opening the app; a tap button is also shown in the chat.' };
+    }
+    const r = runShortcut(S.shortcut, String(app));
+    r.note = `App "${app}" has no known link, so it was sent to the shortcut "${S.shortcut}". ` + r.note;
+    return r;
+  },
+  run_shortcut({ name, input }){ return runShortcut(name, input); },
+  make_call({ number }){ const n = String(number).replace(/[^\d+]/g, ''); if(!n) return { error:'invalid number' }; linkCard('tel:' + n, 'تماس با ' + n, false); return { ok:true, note:'Tap button shown; the phone asks to confirm.' }; },
+  send_sms({ number, text }){ const n = String(number || '').replace(/[^\d+]/g, ''); linkCard('sms:' + n + (text ? '&body=' + enc(text) : ''), 'پیام به ' + (n || 'مخاطب'), false); return { ok:true, note:'Messages opens with the text filled in; the user taps send.' }; },
+  send_email({ to, subject, body }){ linkCard('mailto:' + enc(to) + '?subject=' + enc(subject || '') + '&body=' + enc(body || ''), 'ایمیل به ' + to, false); return { ok:true, note:'Mail opens with the draft; the user taps send.' }; },
+  navigate_to({ destination, mode }){
+    const f = { walking:'w', transit:'r' }[mode] || 'd';
+    linkCard('https://maps.apple.com/?daddr=' + enc(destination) + '&dirflg=' + f, 'مسیر به ' + destination, false);
+    return { ok:true, note:'Tap button shown; it opens Apple Maps.' };
+  },
+  search_youtube({ query }){ linkCard('https://www.youtube.com/results?search_query=' + enc(query), 'یوتیوب: ' + query, false); return { ok:true, note:'Tap button shown; it opens the YouTube app if installed.' }; },
+  async copy_to_clipboard({ text }){
+    let ok = false; try{ await navigator.clipboard.writeText(text); ok = true; }catch(e){}
+    if(!ok) actionCard('متن آماده‌ی کپی:\n' + text, '📋 کپی', () => navigator.clipboard.writeText(text));
+    return { ok:true, copied:ok };
+  },
+  share_text({ text }){
+    actionCard(text, '📤 اشتراک‌گذاری', () => navigator.share ? navigator.share({ text }) : navigator.clipboard.writeText(text));
+    return { ok:true, note:'Share button shown in chat.' };
+  },
+  add_task({ text }){ if(!text) return { error:'text required' }; Lists.d.tasks.push({ id:Lists.id(), t:String(text), done:false }); Lists.save(); renderLists(); return { ok:true }; },
+  list_tasks(){ return { tasks:Lists.d.tasks.map(x => ({ text:x.t, done:x.done })) }; },
+  complete_task({ text }){ const x = Lists.find(Lists.d.tasks, text); if(!x) return { error:'no matching task' }; x.done = true; Lists.save(); renderLists(); return { ok:true, task:x.t }; },
+  add_note({ text }){ if(!text) return { error:'text required' }; Lists.d.notes.unshift({ id:Lists.id(), t:String(text), ts:Date.now() }); Lists.save(); renderLists(); return { ok:true }; },
+  list_notes(){ return { notes:Lists.d.notes.map(x => x.t) }; },
+  delete_note({ text }){ const x = Lists.find(Lists.d.notes, text); if(!x) return { error:'no matching note' }; Lists.d.notes = Lists.d.notes.filter(n => n !== x); Lists.save(); renderLists(); return { ok:true }; },
+  calculate({ expression }){
+    const e = faDigits(expression).replace(/×/g, '*').replace(/÷/g, '/').replace(/\^/g, '**').replace(/٫/g, '.').replace(/[,،٬]/g, '');
+    if(!/^[0-9+\-*/().%\s]+$/.test(e)) return { error:'unsupported characters in expression' };
+    try{ const v = Function('"use strict";return (' + e + ')')(); return Number.isFinite(v) ? { result:v } : { error:'not a finite number' }; }catch(err){ return { error:'invalid expression' }; }
+  },
+  async convert_currency({ amount, from, to }){
+    from = String(from).toUpperCase(); to = String(to).toUpperCase();
+    const j = await (await fetch('https://open.er-api.com/v6/latest/' + enc(from))).json();
+    if(!j.rates || !j.rates[to]) return { error:'rate unavailable for ' + from + '→' + to };
+    return { amount:+amount, from, to, rate:j.rates[to], result:+(amount * j.rates[to]).toFixed(4), updated:j.time_last_update_utc };
+  },
+  async web_search({ query }){
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${S.tmodel}:generateContent`, {
+      method:'POST', headers:{ 'Content-Type':'application/json', 'x-goog-api-key':S.key },
+      body:JSON.stringify({ contents:[{ role:'user', parts:[{ text:query }] }], tools:[{ googleSearch:{} }] })
+    });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok) return { error:(j.error && j.error.message) || ('HTTP ' + r.status) };
+    const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
+    return { answer:parts.filter(p => p.text).map(p => p.text).join('').trim().slice(0, 3000) };
+  }
+};
+
+async function runTool(name, args){
+  const fn = TOOLS[name]; if(!fn) return { error:'unknown tool ' + name };
+  try{ return await fn(args || {}); }catch(e){ return { error:String(e.message || e) }; }
+}
+
+/* ───────── prompt ───────── */
+function buildPrompt(mode){
+  const now = new Date().toLocaleString('en-GB', { dateStyle:'full', timeStyle:'short' });
+  const caps = (mode === 'text' ? DECLS_T : DECLS).map(d => `- ${d.name}: ${d.description}`).join('\n');
+  return `[IDENTITY]
+Your name is ${S.name}. ${S.user ? `Always call the user "${S.user}".` : 'Address the user with the ordinary, friendly-respectful form of the language you are speaking.'}
+You are a ${mode === 'text' ? 'text' : 'voice'} assistant shown as an anime-style character, running as a web app on the user's phone (iPhone, Safari). It is ${now}.
+
+${Mem.prompt()}
+[WHAT YOU CAN DO]
+Judge each request against this list: if it is within reach, DO it by calling the tool instead of describing it. Saying you will do something without calling its tool leaves the user with nothing.
+${caps}
+${mode === 'text' ? '' : '- Google Search (when available): use it for current facts, news, prices, sports and anything that may have changed.'}
+
+[HOW THE TRICKY TOOLS WORK]
+- Opening apps: call open_app. iOS shows a confirmation and the chat shows a tap button, so say "tap the button if nothing opens". For apps with no known link, open_app goes through a Shortcut.
+- Siri / automation: you cannot talk to Siri itself. run_shortcut is the bridge: the user's own Shortcuts can do almost anything on the phone.
+- Screen: a web app cannot record the iPhone screen. look_at_screen asks the user for a screenshot, which then arrives as an image. Never claim you can see the screen before an image arrives.
+- Images: generate_image makes new pictures. After it succeeds say ONE short sentence; do not describe the image at length.
+
+[WHAT YOU CANNOT DO]
+- You live inside this web app. You cannot press buttons in other apps, read other apps, make calls or send messages without the user's tap, or run in the background.
+- Timers only ring while this app stays open on screen.
+- Your sight is one photo on demand (look_with_camera), a screenshot or a photo the user sends — never live video.
+- If something is outside your list, say so plainly in one sentence instead of improvising.
+
+[VOICE]
+Calm, competent, concise — a trusted operator reporting to someone they respect, with a little warmth. Put your assessment in the first sentence. Prefer one concrete fact to an adjective. At most one dry clause of humour, never when something is serious. No filler openers ("great question"), no emoji, no ending on a question just to keep talking. Match length to the task: a status check is one line.
+
+[LANGUAGE]
+Reply in the language of the user's MOST RECENT message (usually Persian/Farsi). Never mix two languages in one reply. Tool results arrive in English: never read them out word for word — say what they mean in the user's language.
+
+[EXECUTION]
+Call each tool once; never report a result you did not get. Before a task that will take a moment, say ONE short sentence in the user's language naming what you are starting, then call the tool in the same turn. Save lasting facts with save_memory silently. When the user says what language they speak, save category=identity, key=language. Use the hour and date above for any time maths.
+Messages starting with [system notice] come from the app, not the user: act on them briefly.`;
+}
+
+/* ───────── UI plumbing ───────── */
+const logEl = $('#log');
+function scrollLog(){ requestAnimationFrame(() => { logEl.scrollTop = logEl.scrollHeight; }); }
+function clearEmpty(){ const e = logEl.querySelector('.empty'); if(e) e.remove(); }
+function addMsg(kind, text){ clearEmpty(); const d = document.createElement('div'); d.className = 'msg ' + kind; d.dir = 'auto'; d.textContent = text; logEl.appendChild(d); scrollLog(); return d; }
+function addImg(b64){ clearEmpty(); const d = document.createElement('div'); d.className = 'msg u'; const i = new Image(); i.src = 'data:image/jpeg;base64,' + b64; d.appendChild(i); logEl.appendChild(d); scrollLog(); }
+let toastT; function toast(t){ const e = $('#toast'); e.textContent = t; e.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => e.classList.remove('show'), 3200); }
+function showEmpty(){
+  if(logEl.children.length) return;
+  const e = document.createElement('div'); e.className = 'empty';
+  e.innerHTML = S.key ? `روی <b>میکروفون</b> بزن و حرف بزن، یا پایین تایپ کن.<br><br>مثلاً: «اینستاگرام رو باز کن»، «یه تصویر از غروب بساز»، «صفحه‌ی گوشیم رو ببین»` :
+    `به <b>${S.name}</b> خوش اومدی.<br>اول از دکمه‌ی ⚙️ بالا، <b>کلید Gemini API</b> رو وارد کن.`;
+  logEl.appendChild(e);
+}
+
+const STATE_FA = { idle:'آماده', connecting:'در حال اتصال…', listening:'گوش می‌دم', thinking:'دارم فکر می‌کنم…', speaking:'در حال صحبت', text:'در حال نوشتن…', drawing:'دارم نقاشی می‌کشم…' };
+let state = 'idle';
+function setState(s){ if(s === state) return; state = s; $('#status').textContent = STATE_FA[s] || s; $('#hd').classList.toggle('on', s !== 'idle'); }
+
+/* ───────── character stage ───────── */
+const orb = $('#orb'), octx = orb.getContext('2d'), stageEl = $('#stage');
+let lvl = 0, W = 0, H = 0, ttsOn = false, lastT = 0;
+function fit(){ const r = orb.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2); W = r.width; H = r.height; orb.width = Math.round(r.width * d); orb.height = Math.round(r.height * d); octx.setTransform(d, 0, 0, d, 0, 0); }
+addEventListener('resize', fit);
+if(window.ResizeObserver) new ResizeObserver(fit).observe(stageEl);
+const fbuf = new Uint8Array(64);
+stageEl.addEventListener('pointermove', e => { const r = stageEl.getBoundingClientRect(); Char.pointer((e.clientX - r.left - r.width / 2) / (r.width / 2), (e.clientY - r.top - r.height / 2) / (r.height / 2)); });
+stageEl.addEventListener('pointerdown', e => { const r = stageEl.getBoundingClientRect(); Char.pointer((e.clientX - r.left - r.width / 2) / (r.width / 2), (e.clientY - r.top - r.height / 2) / (r.height / 2)); Char.poke(); });
+
+function orbFrame(t){
+  requestAnimationFrame(orbFrame);
+  if(!W || !H) return;
+  const dt = Math.min(.05, (t - lastT) / 1000 || .016); lastT = t;
+  const outSpeak = state === 'speaking' || (state === 'listening' && Live.speakingNow());
+  const an = outSpeak ? Live.outAn : Live.inAn;
+  let target = 0;
+  if(an && Live.active){ an.getByteFrequencyData(fbuf); let s = 0; for(let i = 0; i < 40; i++) s += fbuf[i]; target = s / 40 / 255; }
+  if(state === 'listening' && Live.muted) target = 0;
+  const speaking = (Live.active && outSpeak) || ttsOn;
+  if(ttsOn && !Live.active) target = .3 + .45 * Math.abs(Math.sin(t / 105)) * Math.abs(Math.sin(t / 290));
+  lvl += (target - lvl) * .25;
+  octx.clearRect(0, 0, W, H);
+  Char.step(dt, speaking ? Math.min(1, target * 1.6) : lvl * .6, speaking, ttsOn && !Live.active ? 'speaking' : state, outSpeak ? 0 : lvl);
+  Char.paint(octx, W, H, prev.hue != null ? prev.hue : S.hue, prev.hair != null ? prev.hair : S.hair);
+}
+
+/* ───────── mic downsampler (shared by worklet and fallback) ───────── */
+function Down(rate, cb){
+  this.r = rate / 16000; this.sum = 0; this.cnt = 0; this.ph = 0; this.buf = new Int16Array(512); this.n = 0; this.sq = 0;
+  this.push = function(ch){
+    for(let i = 0; i < ch.length; i++){
+      this.sum += ch[i]; this.cnt++; this.ph += 1;
+      if(this.ph >= this.r){
+        let v = this.sum / this.cnt; this.ph -= this.r; this.sum = 0; this.cnt = 0;
+        v = v > 1 ? 1 : v < -1 ? -1 : v; this.sq += v * v;
+        this.buf[this.n++] = v < 0 ? v * 32768 : v * 32767;
+        if(this.n === 512){ const out = this.buf; cb(out, Math.sqrt(this.sq / 512)); this.buf = new Int16Array(512); this.n = 0; this.sq = 0; }
+      }
+    }
+  };
+}
+const WORKLET = `${Down.toString()}
+class Mic extends AudioWorkletProcessor{constructor(){super();this.d=new Down(sampleRate,(p,r)=>this.port.postMessage({pcm:p,rms:r},[p.buffer]))}
+process(i){const c=i[0]&&i[0][0];if(c)this.d.push(c);return true}}
+registerProcessor('mic-down',Mic);`;
+
+/* ───────── Live session ───────── */
+const Live = {
+  ws:null, ready:false, active:false, muted:false, handle:null, variant:0, tries:0, gotSetup:false, everReady:false,
+  ctx:null, stream:null, node:null, inAn:null, outAn:null, gain:null, nextT:0, srcs:new Set(), ub:null, ab:null, wake:null, watch:null, greeted:false,
+
+  speakingNow(){ return !!this.ctx && this.ctx.currentTime < this.nextT + .35; },
+  variants(){
+    return [ { model:S.model, search:true }, { model:S.model, search:false }, { model:'gemini-3.1-flash-live-preview', search:false } ];
+  },
+  buildSetup(v){
+    const tools = [{ functionDeclarations:DECLS }]; if(v.search) tools.push({ googleSearch:{} });
+    return {
+      model:v.model.startsWith('models/') ? v.model : 'models/' + v.model,
+      generationConfig:{ responseModalities:['AUDIO'], speechConfig:{ voiceConfig:{ prebuiltVoiceConfig:{ voiceName:S.voice } } } },
+      systemInstruction:{ parts:[{ text:buildPrompt('voice') }] },
+      tools, inputAudioTranscription:{}, outputAudioTranscription:{},
+      sessionResumption:this.handle ? { handle:this.handle } : {},
+      contextWindowCompression:{ slidingWindow:{} }
+    };
+  },
+  send(o){ if(this.ws && this.ws.readyState === 1) this.ws.send(JSON.stringify(o)); },
+
+  async start(){
+    if(!S.key){ openSheet('shSet'); toast('اول کلید API رو وارد کن'); return; }
+    setState('connecting'); $('#mic').classList.add('live'); $('#btnMute').style.display = '';
+    try{
+      const AC = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AC(); await this.ctx.resume();
+      try{ if(navigator.audioSession) navigator.audioSession.type = 'play-and-record'; }catch(e){}
+      this.stream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true, autoGainControl:true, channelCount:1 } });
+    }catch(e){ return this.fail('دسترسی به میکروفون ممکن نشد. در تنظیمات Safari اجازه‌ی میکروفون بده. (' + (e.message || e) + ')'); }
+    this.gain = this.ctx.createGain(); this.outAn = this.ctx.createAnalyser(); this.outAn.fftSize = 128; this.outAn.smoothingTimeConstant = .7;
+    this.gain.connect(this.outAn); this.outAn.connect(this.ctx.destination);
+    const src = this.ctx.createMediaStreamSource(this.stream);
+    this.inAn = this.ctx.createAnalyser(); this.inAn.fftSize = 128; this.inAn.smoothingTimeConstant = .7; src.connect(this.inAn);
+    const onChunk = (pcm) => {
+      if(!this.ready || this.muted) return;
+      if(!S.interrupt && this.speakingNow()) return;
+      this.send({ realtimeInput:{ audio:{ data:toB64(new Uint8Array(pcm.buffer)), mimeType:'audio/pcm;rate=16000' } } });
+    };
+    try{
+      await this.ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([WORKLET], { type:'application/javascript' })));
+      this.node = new AudioWorkletNode(this.ctx, 'mic-down'); this.node.port.onmessage = e => onChunk(e.data.pcm);
+      const z = this.ctx.createGain(); z.gain.value = 0; src.connect(this.node); this.node.connect(z); z.connect(this.ctx.destination);
+    }catch(e){
+      const d = new Down(this.ctx.sampleRate, onChunk);
+      this.node = this.ctx.createScriptProcessor(2048, 1, 1); this.node.onaudioprocess = ev => d.push(ev.inputBuffer.getChannelData(0));
+      const z = this.ctx.createGain(); z.gain.value = 0; src.connect(this.node); this.node.connect(z); z.connect(this.ctx.destination);
+    }
+    try{ if(navigator.wakeLock) this.wake = await navigator.wakeLock.request('screen'); }catch(e){}
+    this.active = true; this.variant = 0; this.tries = 0; this.handle = null; this.greeted = false;
+    this.watch = setInterval(() => {
+      if(!this.active || !this.ready) return;
+      if(this.speakingNow() && state !== 'thinking' && state !== 'drawing') setState('speaking');
+      else if(state === 'speaking') setState('listening');
+    }, 120);
+    this.connect();
+  },
+
+  connect(){
+    const v = this.variants()[this.variant];
+    setState('connecting');
+    let ws;
+    try{ ws = new WebSocket((LS.get('jv_ws', '') || WS_BASE) + '?key=' + encodeURIComponent(S.key)); }
+    catch(e){ return this.fail('ساخت اتصال ممکن نشد: ' + e.message); }
+    ws.binaryType = 'arraybuffer'; this.ws = ws; this.gotSetup = false; this.ready = false;
+    ws.onopen = () => ws.send(JSON.stringify({ setup:this.buildSetup(v) }));
+    ws.onmessage = e => { try{ this.onMsg(JSON.parse(typeof e.data === 'string' ? e.data : new TextDecoder().decode(e.data))); }catch(err){ console.error(err); } };
+    ws.onerror = () => {};
+    ws.onclose = ev => {
+      if(ws !== this.ws) return;
+      this.ready = false;
+      if(!this.active) return;
+      if(!this.gotSetup){
+        if(this.variant < this.variants().length - 1){ this.variant++; return setTimeout(() => this.active && this.connect(), 250); }
+        return this.fail(`اتصال به Gemini برقرار نشد (کد ${ev.code}${ev.reason ? ': ' + ev.reason : ''}). کلید API و فیلترشکن (VPN) رو چک کن.` +
+          (this.everReady ? '' : ' می‌تونی تایپ کنی؛ حالت متنی هم کار می‌کنه.'));
+      }
+      if(this.tries < 4){ this.tries++; setState('connecting'); setTimeout(() => this.active && this.connect(), 500 * this.tries); }
+      else this.fail('ارتباط قطع شد. دوباره میکروفون رو بزن.');
+    };
+  },
+
+  onMsg(m){
+    if(m.setupComplete){
+      this.gotSetup = true; this.ready = true; this.everReady = true; this.tries = 0; setState('listening');
+      if(!this.greeted){ this.greeted = true; this.send({ realtimeInput:{ text:'[system notice] The voice session just started. Greet the user in one short sentence in Persian.' } }); }
+      return;
+    }
+    if(m.sessionResumptionUpdate && m.sessionResumptionUpdate.newHandle) this.handle = m.sessionResumptionUpdate.newHandle;
+    const sc = m.serverContent;
+    if(sc){
+      if(sc.interrupted){ this.stopPlayback(); this.ab = null; }
+      if(sc.inputTranscription && sc.inputTranscription.text){
+        this.ab = null;
+        if(!this.ub) this.ub = addMsg('u', ''); this.ub.textContent += sc.inputTranscription.text; scrollLog();
+      }
+      if(sc.modelTurn && sc.modelTurn.parts) for(const p of sc.modelTurn.parts){
+        if(p.inlineData && p.inlineData.data && /audio/.test(p.inlineData.mimeType || 'audio')) this.play(p.inlineData.data);
+      }
+      if(sc.outputTranscription && sc.outputTranscription.text){
+        this.ub = null;
+        if(!this.ab) this.ab = addMsg('a', ''); this.ab.textContent += sc.outputTranscription.text; scrollLog();
+      }
+      if(sc.turnComplete){ this.ub = null; this.ab = null; if(!this.speakingNow() && state !== 'idle') setState('listening'); }
+    }
+    if(m.toolCall && m.toolCall.functionCalls) this.onTools(m.toolCall.functionCalls);
+  },
+
+  async onTools(calls){
+    setState('thinking');
+    const out = [];
+    for(const c of calls){
+      const r = await runTool(c.name, c.args);
+      if(r && r._image){ this.send({ realtimeInput:{ video:{ data:r._image, mimeType:'image/jpeg' } } }); delete r._image; }
+      out.push({ id:c.id, name:c.name, response:{ result:r } });
+    }
+    this.send({ toolResponse:{ functionResponses:out } });
+    if(!this.speakingNow()) setState('listening');
+  },
+
+  play(b64){
+    const bin = atob(b64), n = bin.length >> 1, f = new Float32Array(n);
+    for(let i = 0; i < n; i++){ let v = bin.charCodeAt(2 * i) | (bin.charCodeAt(2 * i + 1) << 8); if(v & 0x8000) v -= 0x10000; f[i] = v / 32768; }
+    const buf = this.ctx.createBuffer(1, n, 24000); buf.copyToChannel(f, 0);
+    const s = this.ctx.createBufferSource(); s.buffer = buf; s.connect(this.gain);
+    const t = Math.max(this.nextT, this.ctx.currentTime + .03); s.start(t); this.nextT = t + buf.duration;
+    this.srcs.add(s); s.onended = () => this.srcs.delete(s);
+    setState('speaking');
+  },
+  stopPlayback(){ this.srcs.forEach(s => { try{ s.stop(); }catch(e){} }); this.srcs.clear(); if(this.ctx) this.nextT = this.ctx.currentTime; },
+
+  sendText(t){ this.send({ realtimeInput:{ text:t } }); setState('thinking'); },
+  sendImage(b64){ this.send({ realtimeInput:{ video:{ data:b64, mimeType:'image/jpeg' } } }); },
+
+  fail(msg){ addMsg('s err', msg); this.stop(true); },
+  stop(keepMsg){
+    const was = this.active; this.active = false; this.ready = false; clearInterval(this.watch);
+    try{ this.ws && this.ws.close(); }catch(e){} this.ws = null;
+    this.stopPlayback();
+    try{ this.stream && this.stream.getTracks().forEach(t => t.stop()); }catch(e){}
+    try{ this.node && this.node.disconnect(); }catch(e){}
+    try{ this.ctx && this.ctx.close(); }catch(e){}
+    try{ this.wake && this.wake.release(); }catch(e){}
+    this.ctx = this.stream = this.node = this.inAn = this.outAn = this.wake = null; this.nextT = 0; this.ub = this.ab = null; this.muted = false;
+    $('#mic').classList.remove('live'); $('#btnMute').style.display = 'none'; $('#btnMute').classList.remove('warn');
+    setState('idle'); if(was && !keepMsg) addMsg('s', 'گفتگوی صوتی تموم شد');
+  }
+};
+
+/* ───────── text mode (REST) ───────── */
+const hist = [];
+let busyText = false;
+async function textChat(userText, imageB64){
+  if(busyText) return; busyText = true; setState('text');
+  const parts = []; if(imageB64) parts.push({ inlineData:{ mimeType:'image/jpeg', data:imageB64 } }); if(userText) parts.push({ text:userText });
+  hist.push({ role:'user', parts });
+  try{
+    for(let i = 0; i < 6; i++){
+      let r, j;
+      for(let a = 0; a < 4; a++){
+        r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${S.tmodel}:generateContent`, {
+          method:'POST', headers:{ 'Content-Type':'application/json', 'x-goog-api-key':S.key },
+          body:JSON.stringify({ systemInstruction:{ parts:[{ text:buildPrompt('text') }] }, contents:hist, tools:[{ functionDeclarations:DECLS_T }] })
+        });
+        j = await r.json().catch(() => ({}));
+        if(r.ok || ![429, 500, 503].includes(r.status) || a === 3) break;
+        setState('connecting'); await sleep(2000 * (a + 1));
+      }
+      if(!r.ok) throw new Error((j.error && j.error.message) || ('HTTP ' + r.status));
+      const content = j.candidates && j.candidates[0] && j.candidates[0].content;
+      if(!content || !content.parts){ throw new Error('پاسخی برنگشت (' + ((j.promptFeedback && j.promptFeedback.blockReason) || (j.candidates && j.candidates[0] && j.candidates[0].finishReason) || '؟') + ')'); }
+      hist.push(content);
+      const calls = content.parts.filter(p => p.functionCall);
+      if(!calls.length){
+        const text = content.parts.filter(p => p.text && !p.thought).map(p => p.text).join('').trim();
+        if(text){ addMsg('a', text); speak(text); }
+        break;
+      }
+      setState('thinking');
+      const resp = [], extra = [];
+      for(const c of calls){
+        const res = await runTool(c.functionCall.name, c.functionCall.args);
+        if(res && res._image){ extra.push({ inlineData:{ mimeType:'image/jpeg', data:res._image } }); delete res._image; }
+        resp.push({ functionResponse:{ name:c.functionCall.name, response:{ result:res }, ...(c.functionCall.id ? { id:c.functionCall.id } : {}) } });
+      }
+      hist.push({ role:'user', parts:[...resp, ...extra] });
+    }
+  }catch(e){ addMsg('s err', 'خطا: ' + (e.message || e)); }
+  busyText = false; setState(Live.active ? 'listening' : 'idle');
+}
+function speak(text){
+  if(!S.tts || !window.speechSynthesis) return;
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/[*_#`]/g, ''));
+    u.lang = /[؀-ۿ]/.test(text) ? 'fa-IR' : 'en-US';
+    const vs = speechSynthesis.getVoices().find(v => v.lang.replace('_', '-').startsWith(u.lang.slice(0, 2))); if(vs) u.voice = vs;
+    u.onstart = () => { ttsOn = true; }; u.onend = u.onerror = () => { ttsOn = false; };
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ───────── input wiring ───────── */
+function ask(t){
+  if(!S.key){ openSheet('shSet'); toast('اول کلید API رو وارد کن'); return; }
+  addMsg('u', t);
+  if(Live.ready){ Live.ub = null; Live.sendText(t); } else textChat(t);
+}
+function submitText(){
+  const t = $('#txt').value.trim(); if(!t) return;
+  $('#txt').value = ''; $('#txt').style.height = ''; $('#bar').classList.remove('typing');
+  ask(t);
+}
+function prefill(t){ const el = $('#txt'); el.value = t; el.dispatchEvent(new Event('input')); el.focus(); }
+$('#send').onclick = submitText;
+$('#txt').addEventListener('input', e => { const el = e.target; el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 110) + 'px'; $('#bar').classList.toggle('typing', !!el.value.trim()); });
+$('#txt').addEventListener('keydown', e => { if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); submitText(); } });
+$('#mic').onclick = () => { Live.active ? Live.stop() : Live.start(); };
+$('#btnMute').onclick = () => { Live.muted = !Live.muted; $('#btnMute').classList.toggle('warn', Live.muted); toast(Live.muted ? 'میکروفون قطع شد' : 'میکروفون وصل شد'); };
+$('#file').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; const kind = fileKind; fileKind = 'photo'; if(!f) return;
+  if(!S.key){ openSheet('shSet'); return; }
+  useBlob(f, kind);
+};
+$('#chips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if(!b) return;
+  ({
+    cam: snapCamera, screen: openScreen, gallery: () => pickShot('photo'),
+    img: () => prefill('یه تصویر بساز از '), open: () => openSheet('shApps'), lists: () => openSheet('shLists'),
+    weather: () => ask('هوای اینجا چطوره؟'), timer: () => ask('یه تایمر ۵ دقیقه‌ای بذار')
+  })[b.dataset.a]();
+});
+
+/* ───────── sheets ───────── */
+function openSheet(id){ $('#' + id).classList.add('open'); if(id === 'shSet') fillSettings(); if(id === 'shMem') renderMem(); if(id === 'shLists') renderLists(); if(id === 'shScreen') $('#scLive').style.display = canDisplay ? '' : 'none'; }
+function closeSheets(){ document.querySelectorAll('.sheet').forEach(s => s.classList.remove('open')); if(prev.hue != null || prev.hair != null){ prev.hue = prev.hair = null; applyTheme(); } }
+document.querySelectorAll('[data-close]').forEach(b => b.onclick = closeSheets);
+document.querySelectorAll('.sheet').forEach(s => s.addEventListener('click', e => { if(e.target === s) closeSheets(); }));
+$('#btnSet').onclick = () => openSheet('shSet');
+$('#btnMem').onclick = () => openSheet('shMem');
+$('#btnLists').onclick = () => openSheet('shLists');
+$('#sVoice').innerHTML = VOICES.map(v => `<option>${v}</option>`).join('');
+function fillSettings(){
+  $('#sKey').value = S.key; $('#sName').value = S.name; $('#sUser').value = S.user; $('#sVoice').value = S.voice; $('#sHue').value = S.hue; $('#sHair').value = S.hair;
+  $('#sInt').checked = S.interrupt; $('#sTts').checked = S.tts; $('#sModel').value = S.model; $('#sTModel').value = S.tmodel; $('#sIModel').value = S.imodel; $('#sShortcut').value = S.shortcut;
+}
+$('#sHue').oninput = e => { prev.hue = +e.target.value; applyTheme(prev.hue); };
+$('#sHair').oninput = e => { prev.hair = +e.target.value; };
+$('#sSave').onclick = () => {
+  Object.assign(S, { key:$('#sKey').value.trim(), name:$('#sName').value.trim() || 'جارویس', user:$('#sUser').value.trim(), voice:$('#sVoice').value,
+    hue:+$('#sHue').value, hair:+$('#sHair').value, interrupt:$('#sInt').checked, tts:$('#sTts').checked,
+    model:$('#sModel').value.trim() || DEF.model, tmodel:$('#sTModel').value.trim() || DEF.tmodel, imodel:$('#sIModel').value.trim() || DEF.imodel, shortcut:$('#sShortcut').value.trim() || DEF.shortcut });
+  prev.hue = prev.hair = null; saveS(); applyTheme(); closeSheets(); logEl.querySelector('.empty') && (logEl.innerHTML = '', showEmpty());
+  toast(Live.active ? 'ذخیره شد — تغییر صدا و اسم از گفتگوی بعدی اعمال می‌شه' : 'ذخیره شد');
+};
+$('#sClear').onclick = () => { logEl.innerHTML = ''; hist.length = 0; showEmpty(); closeSheets(); };
+
+function renderMem(){
+  const items = Mem.all();
+  $('#memList').innerHTML = items.length ? '' : '<div class="help">هنوز چیزی ذخیره نشده. حین گفتگو هر چیز مهمی بگی (اسم، علایق، پروژه‌ها) خودش ذخیره می‌کنه.</div>';
+  items.forEach(m => {
+    const d = document.createElement('div'); d.className = 'mem';
+    const s = document.createElement('span'); s.dir = 'auto'; s.innerHTML = '<small></small><br>'; s.firstChild.textContent = m.c + ' · ' + m.k; s.appendChild(document.createTextNode(m.v));
+    const b = document.createElement('button'); b.textContent = '×'; b.setAttribute('aria-label', 'حذف'); b.onclick = () => { Mem.del(m.c, m.k); renderMem(); };
+    d.append(s, b); $('#memList').appendChild(d);
+  });
+}
+$('#memWipe').onclick = () => { if(confirm('همه‌ی حافظه پاک بشه؟')){ Mem.data = {}; Mem.save(); renderMem(); } };
+
+function renderLists(){
+  const T = $('#taskList'), N = $('#noteList'); T.innerHTML = N.innerHTML = '';
+  if(!Lists.d.tasks.length) T.innerHTML = '<div class="help">خالیه.</div>';
+  if(!Lists.d.notes.length) N.innerHTML = '<div class="help">خالیه.</div>';
+  Lists.d.tasks.forEach(x => {
+    const d = document.createElement('div'); d.className = 'mem' + (x.done ? ' done' : '');
+    const c = document.createElement('input'); c.type = 'checkbox'; c.checked = x.done; c.onchange = () => { x.done = c.checked; Lists.save(); renderLists(); };
+    const s = document.createElement('span'); s.dir = 'auto'; s.textContent = x.t;
+    const b = document.createElement('button'); b.textContent = '×'; b.setAttribute('aria-label', 'حذف'); b.onclick = () => { Lists.d.tasks = Lists.d.tasks.filter(y => y !== x); Lists.save(); renderLists(); };
+    d.append(c, s, b); T.appendChild(d);
+  });
+  Lists.d.notes.forEach(x => {
+    const d = document.createElement('div'); d.className = 'mem';
+    const s = document.createElement('span'); s.dir = 'auto'; s.textContent = x.t;
+    const b = document.createElement('button'); b.textContent = '×'; b.setAttribute('aria-label', 'حذف'); b.onclick = () => { Lists.d.notes = Lists.d.notes.filter(y => y !== x); Lists.save(); renderLists(); };
+    d.append(s, b); N.appendChild(d);
+  });
+}
+$('#addTask').onclick = () => { const v = $('#listIn').value.trim(); if(v){ TOOLS.add_task({ text:v }); $('#listIn').value = ''; } };
+$('#addNote').onclick = () => { const v = $('#listIn').value.trim(); if(v){ TOOLS.add_note({ text:v }); $('#listIn').value = ''; } };
+
+/* apps sheet */
+$('#appGrid').innerHTML = Object.keys(APPS).map(k => { const a = APPS[k]; return `<a class="app" style="--ac:${a.c}" href="${a.u}"><span>${a.e}</span>${a.n}</a>`; }).join('');
+$('#appRun').onclick = () => {
+  const v = $('#appName').value.trim(); if(!v) return;
+  const a = findApp(v);
+  if(a) location.href = a.u; else location.href = 'shortcuts://run-shortcut?name=' + enc(S.shortcut) + '&input=text&text=' + enc(v);
+};
+
+/* screen sheet */
+$('#scPaste').onclick = pasteShot;
+$('#scPick').onclick = () => pickShot('screen');
+$('#scLive').onclick = async () => { try{ deliverImage(await captureDisplay(), 'screen'); }catch(e){ toast('ضبط صفحه شروع نشد'); } };
+
+/* ───────── timers ring ───────── */
+function fireTimer(label){
+  addMsg('s', '⏰ تایمر تموم شد' + (label ? ': ' + label : ''));
+  Char.poke();
+  try{
+    const c = Live.ctx || new (window.AudioContext || window.webkitAudioContext)();
+    [0, .25, .5].forEach(o => { const os = c.createOscillator(), g = c.createGain(); os.frequency.value = 880; g.gain.value = .15; os.connect(g); g.connect(c.destination); os.start(c.currentTime + o); os.stop(c.currentTime + o + .15); });
+  }catch(e){}
+  try{ navigator.vibrate && navigator.vibrate([200, 100, 200]); }catch(e){}
+  try{ navigator.serviceWorker && navigator.serviceWorker.ready.then(r => Notification.permission === 'granted' && r.showNotification(S.name, { body:'تایمر تموم شد' + (label ? ': ' + label : '') })); }catch(e){}
+  toast('⏰ ' + (label || 'تایمر تموم شد'));
+  if(Live.ready) Live.sendText(`[system notice] The timer${label ? ' "' + label + '"' : ''} has just finished. Tell the user in one short sentence.`);
+}
+
+/* ───────── boot ───────── */
+applyTheme(); fit(); requestAnimationFrame(orbFrame); showEmpty();
+const standalone = window.navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+if(/iPhone|iPad/.test(navigator.userAgent) && !standalone && !LS.get('jv_inst', false)) $('#install').style.display = 'block';
+$('#instX').onclick = () => { $('#install').style.display = 'none'; LS.set('jv_inst', true); };
+if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+if(window.speechSynthesis) speechSynthesis.getVoices();
+document.addEventListener('visibilitychange', async () => { if(!document.hidden && Live.active && Live.ctx && Live.ctx.state !== 'running'){ try{ await Live.ctx.resume(); }catch(e){} } });
+if(location.hash === '#screen'){ history.replaceState(null, '', location.pathname + location.search); setTimeout(() => openSheet('shScreen'), 400); }
+window.__jv = { Live, S, TOOLS };
+</script>
+</body>
+</html>
