@@ -1,7 +1,10 @@
 export async function onRequestPost(context) {
   const { request, env } = context;
   const key = env.GEMINI_API_KEY;
-  const corsOrigin = env.JARVIS_ALLOWED_ORIGIN || '*';
+  const requestOrigin = request.headers.get('Origin') || '';
+  const allowedOrigin = env.JARVIS_ALLOWED_ORIGIN || '*';
+  if (allowedOrigin !== '*' && requestOrigin && requestOrigin !== allowedOrigin) return new Response(JSON.stringify({error:'Origin not allowed'}), {status:403, headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
+  const corsOrigin = allowedOrigin === '*' ? '*' : (requestOrigin === allowedOrigin ? requestOrigin : allowedOrigin);
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': corsOrigin,
@@ -13,6 +16,8 @@ export async function onRequestPost(context) {
   if (!key) return new Response(JSON.stringify({error:'GEMINI_API_KEY is not configured'}), {status:500, headers});
 
   try {
+    const contentLength = Number(request.headers.get('content-length') || 0);
+    if (contentLength > 12 * 1024 * 1024) return new Response(JSON.stringify({error:'Request too large'}), {status:413,headers});
     const body = await request.json();
 
     if (body.action === 'live_token') {
