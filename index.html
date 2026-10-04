@@ -854,7 +854,7 @@ async function textChat(userText, imageB64){
     for(let i = 0; i < 6; i++){
       let r, j;
       for(let a = 0; a < 4; a++){
-        r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${S.tmodel}:generateContent`, {
+        r = S.proxy ? await fetch(S.proxy,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'chat',model:S.tmodel,systemPrompt:buildPrompt('text'),contents:hist,tools:DECLS_T})}) : await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${S.tmodel}:generateContent`, {
           method:'POST', headers:{ 'Content-Type':'application/json', 'x-goog-api-key':S.key },
           body:JSON.stringify({ systemInstruction:{ parts:[{ text:buildPrompt('text') }] }, contents:hist, tools:[{ functionDeclarations:DECLS_T }] })
         });
