@@ -5,13 +5,13 @@ export default async function handler(req, res) {
   try {
     const body = req.body || {};
     if (body.action === 'live_token') {
-      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/authTokens:generate', {
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/auth_tokens', {
         method:'POST',
         headers:{'Content-Type':'application/json','x-goog-api-key':key},
-        body:JSON.stringify({ uses:1 })
+        body:JSON.stringify({ uses:1, expireTime:new Date(Date.now()+30*60*1000).toISOString(), newSessionExpireTime:new Date(Date.now()+60*1000).toISOString() })
       });
       const j = await r.json();
-      return res.status(r.status).json(j);
+      return res.status(r.status).json(r.ok ? {token:j.name} : j);
     }
     if (body.action === 'generate_image') {
       const parts = [];
