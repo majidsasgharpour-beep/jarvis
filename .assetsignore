@@ -8,3 +8,4 @@ functions/
 !.dev.vars.example
 .git/
 .github/
+api-core.js
