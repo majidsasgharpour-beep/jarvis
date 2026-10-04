@@ -32,6 +32,10 @@ export default async function handler(req, res) {
       const j = await r.json();
       return res.status(r.status).json(j);
     }
+    if (body.action === 'web_search') {
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(body.model || 'gemini-3.8-flash')+':generateContent', {method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify({contents:[{role:'user',parts:[{text:String(body.query||'')}]}],tools:[{googleSearch:{}}]})});
+      const j = await r.json(); return res.status(r.status).json(j);
+    }
     if (body.action === 'chat') {
       const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(body.model || 'gemini-3.8-flash')+':generateContent', {
         method:'POST',
