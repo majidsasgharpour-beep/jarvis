@@ -451,7 +451,7 @@ async function openScreen(){
   openSheet('shScreen');
 }
 async function snapCamera(){
-  if(!S.key){ openSheet('shSet'); return; }
+  if(!S.proxy && !S.key){ openSheet('shSet'); toast('اتصال API را در تنظیمات وارد کن'); return; }
   try{ const b64 = await captureCamera('environment'); const q = $('#txt').value.trim(); $('#txt').value = ''; $('#bar').classList.remove('typing');
     if(q) addMsg('u', q);
     if(Live.ready){ Live.sendImage(b64); Live.sendText(`[system notice] The user just took a camera photo. ${q ? 'They ask: ' + q : 'Describe what matters, briefly.'}`); }
@@ -932,6 +932,7 @@ $('#chips').addEventListener('click', e => {
 async function openImageStudio(){ openSheet('shImage'); setTimeout(() => $('#imgPrompt').focus(), 50); }
 async function makeImageFromStudio(){ const p=$('#imgPrompt').value.trim(); if(!p){ toast('توضیح تصویر را بنویس'); return; } closeSheets(); await runTool('generate_image',{prompt:p,aspect_ratio:$('#imgRatio').value,image_size:$('#imgSize').value,image_b64:window.__editImageB64||''}); window.__editImageB64=''; }
 $('#imgGo').onclick=makeImageFromStudio;
+$('#imgUpload').onclick=() => pickShot('image-edit');
 function openSheet(id){ $('#' + id).classList.add('open'); if(id === 'shSet') fillSettings(); if(id === 'shMem') renderMem(); if(id === 'shLists') renderLists(); if(id === 'shScreen') $('#scLive').style.display = canDisplay ? '' : 'none'; }
 function closeSheets(){ document.querySelectorAll('.sheet').forEach(s => s.classList.remove('open')); if(prev.hue != null || prev.hair != null){ prev.hue = prev.hair = null; applyTheme(); } }
 document.querySelectorAll('[data-close]').forEach(b => b.onclick = closeSheets);
