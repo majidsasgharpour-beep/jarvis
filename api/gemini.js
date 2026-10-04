@@ -1,7 +1,12 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const key = process.env.GEMINI_API_KEY;
-  if (!key) return res.status(500).json({ error: 'GEMINI_API_KEY is not configured' });
+  if (!key) return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server' });
+  const origin = req.headers.origin;
+  const allowed = process.env.JARVIS_ALLOWED_ORIGIN;
+  if (allowed && origin && origin !== allowed) return res.status(403).json({ error: 'Origin not allowed' });
+  const bodyLength = Number(req.headers['content-length'] || 0);
+  if (bodyLength > 12 * 1024 * 1024) return res.status(413).json({ error: 'Request too large' });
   try {
     const body = req.body || {};
     if (body.action === 'live_token') {
@@ -14,6 +19,8 @@ export default async function handler(req, res) {
       return res.status(r.status).json(r.ok ? {token:j.name} : j);
     }
     if (body.action === 'generate_image') {
+      if (!body.prompt || String(body.prompt).length > 12000) return res.status(400).json({ error:'Prompt is missing or too long' });
+      if (body.image_b64 && String(body.image_b64).length > 10 * 1024 * 1024) return res.status(413).json({ error:'Image is too large' });
       const input = [];
       if (body.prompt) input.push({ type:'text', text:String(body.prompt) });
       if (body.image_b64) input.push({ type:'image', mime_type:'image/jpeg', data:body.image_b64 });
