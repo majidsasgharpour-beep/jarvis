@@ -517,7 +517,8 @@ const TOOLS = {
       const parts=[...(image_b64?[{inlineData:{mimeType:'image/jpeg',data:image_b64}}]:[]),{text:prompt}];
       const r = S.proxy ? await fetch(S.proxy,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}) : await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${S.imodel}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':S.key},body:JSON.stringify({contents:[{parts}],generationConfig:{responseModalities:['TEXT','IMAGE'],responseFormat:{image:{aspectRatio:aspect_ratio||'1:1',imageSize:image_size||'1K'}}})});
       const j = await r.json().catch(() => ({}));
-      if(!r.ok) return { error:(j.error && j.error.message) || ('HTTP ' + r.status) };
+      if(!r.ok) return { error:(j.error && j.error.message) || j.message || ('HTTP ' + r.status) };
+      if(S.proxy && j.image_b64){ showGenImage(j.image_b64, j.mimeType || 'image/jpeg'); return { ok:true, shown:true, note:'The picture is already visible in the chat.' }; }
       const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
       const img = parts.find(p => p.inlineData && p.inlineData.data);
       if(!img) return { error:'no image returned: ' + (parts.map(p => p.text).filter(Boolean).join(' ').slice(0, 200) || (j.promptFeedback && j.promptFeedback.blockReason) || 'blocked or unsupported model') };
