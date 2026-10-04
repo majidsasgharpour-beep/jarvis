@@ -125,7 +125,7 @@ h3{font-size:14px;color:var(--dim);margin:16px 0 4px}
   <div id="chips">
     <button class="chip" style="--cc:#34d399" data-a="cam">📷 دوربین</button>
     <button class="chip" style="--cc:#fb923c" data-a="screen">🖥 صفحه</button>
-    <button class="chip" style="--cc:#c084fc" data-a="img">🎨 تصویر بساز</button>
+    <button class="chip" style="--cc:#c084fc" data-a="img">🎨 تصویر بساز</button><button class="chip" style="--cc:#e879f9" data-a="imageStudio">🪄 استودیو تصویر</button><button class="chip" style="--cc:#60a5fa" data-a="upload">📎 عکس من</button>
     <button class="chip" style="--cc:#38bdf8" data-a="gallery">🖼 عکس</button>
     <button class="chip" style="--cc:#f472b6" data-a="open">🚀 برنامه‌ها</button>
     <button class="chip" style="--cc:#fde047" data-a="weather">🌤 هوا</button>
@@ -143,7 +143,7 @@ h3{font-size:14px;color:var(--dim);margin:16px 0 4px}
 
 <div class="sheet" id="shSet"><div class="in">
   <h2>تنظیمات <button class="ib x" data-close>✕</button></h2>
-  <label>کلید Gemini API</label>
+  <label>آدرس API سرور (نسخه عمومی)</label><input class="f" id="sProxy" placeholder="/api/gemini"><div class="help">برای نسخه عمومی، کلید Gemini باید فقط روی سرور باشد.</div><label>کلید Gemini API (حالت شخصی)</label>
   <input class="f" id="sKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="AIza…">
   <div class="help" style="margin-top:6px">رایگان از <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> بگیر. کلید فقط روی همین گوشی ذخیره می‌شه.</div>
   <label>اسم دستیار</label><input class="f rtl" id="sName">
@@ -197,7 +197,7 @@ h3{font-size:14px;color:var(--dim);margin:16px 0 4px}
   <div class="help" style="margin-top:12px">برای خودکار شدن: توی README یه شورتکات + Back Tap توضیح دادم که با دو بار ضربه روی پشت گوشی اسکرین‌شات بگیره و بیاد اینجا.</div>
 </div></div>
 
-<div id="toast"></div>
+<div class="sheet" id="shImage"><div class="in"><h2>استودیو ساخت تصویر <button class="ib x" data-close>✕</button></h2><label>چی بسازم؟</label><textarea class="f rtl" id="imgPrompt" rows="4" placeholder="مثلاً: یک شهر آینده‌نگر در شب، باران، نور نئون، سبک سینمایی…"></textarea><div class="row2"><div style="flex:1"><label>نسبت</label><select class="f" id="imgRatio"><option>1:1</option><option>16:9</option><option>9:16</option><option>4:3</option><option>3:4</option></select></div><div style="flex:1"><label>کیفیت</label><select class="f" id="imgSize"><option>1K</option><option>2K</option></select></div></div><button class="btn big" style="--cc:#c084fc" id="imgGo">✨ ساخت تصویر</button><button class="btn big" style="--cc:#38bdf8" id="imgUpload">🖼 ویرایش با عکس من</button></div></div><div id="toast"></div>
 
 <script>
 'use strict';
@@ -215,10 +215,10 @@ const WS_BASE = 'wss://generativelanguage.googleapis.com/ws/google.ai.generative
 
 /* ───────── settings ───────── */
 const DEF = { key:'', name:'جارویس', user:'', voice:'Charon', hue:270, hair:325, model:'gemini-3.8-live', tmodel:'gemini-3.8-flash',
-  imodel:'gemini-2.5-flash-image', shortcut:'OpenApp', interrupt:false, tts:true, ver:3 };
+  imodel:'gemini-3.1-flash-image', shortcut:'OpenApp', interrupt:false, tts:true, ver:4 };
 const S = Object.assign({}, DEF, LS.get('jv_settings', {}));
 const saveS = () => LS.set('jv_settings', S);
-if(S.ver !== 3){ S.hue = DEF.hue; S.hair = DEF.hair; S.ver = 3; saveS(); }
+if(S.ver !== 4){ S.hue = DEF.hue; S.hair = DEF.hair; S.ver = 4; if(S.proxy == null) S.proxy = DEF.proxy; saveS(); }
 const prev = { hue:null, hair:null };
 function applyTheme(h){ document.documentElement.style.setProperty('--h', h == null ? S.hue : h); $('#title').textContent = S.name; }
 
@@ -421,6 +421,7 @@ function deliverImage(b64, kind){
   closeSheets(); addImg(b64);
   const q = $('#txt').value.trim(); $('#txt').value = ''; $('#txt').style.height = ''; $('#bar').classList.remove('typing');
   if(q) addMsg('u', q);
+  if(kind === 'image-edit'){ window.__editImageB64=b64; openImageStudio(); $('#imgPrompt').value='این تصویر را با حفظ سوژه اصلی ویرایش کن: '; toast('عکس آماده است؛ توضیح ویرایش را بنویس و ساخت را بزن'); return; }
   if(Live.ready){
     Live.sendImage(b64);
     const what = kind === 'screen' ? "a screenshot of the user's phone screen" : kind === 'camera' ? 'a photo from the phone camera' : 'a photo the user sent';
@@ -508,14 +509,13 @@ const TOOLS = {
     openScreen();
     return { ok:true, note:'A panel was opened asking the user to paste or pick a screenshot. The image will arrive as the next message; wait for it.' };
   },
-  async generate_image({ prompt }){
-    if(!prompt) return { error:'prompt required' };
+  async generate_image({ prompt, aspect_ratio, image_size, image_b64 }){
+    if(!prompt) return { error:'prompt required' }; if(!S.proxy && !S.key) return { error:'API connection is not configured' };
     setState('drawing');
     try{
-      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${S.imodel}:generateContent`, {
-        method:'POST', headers:{ 'Content-Type':'application/json', 'x-goog-api-key':S.key },
-        body:JSON.stringify({ contents:[{ parts:[{ text:prompt }] }], generationConfig:{ responseModalities:['TEXT', 'IMAGE'] } })
-      });
+      const payload={action:'generate_image',model:S.imodel,prompt,aspect_ratio:aspect_ratio||'1:1',image_size:image_size||'1K',image_b64:image_b64||''};
+      const parts=[...(image_b64?[{inlineData:{mimeType:'image/jpeg',data:image_b64}}]:[]),{text:prompt}];
+      const r = S.proxy ? await fetch(S.proxy,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}) : await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${S.imodel}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':S.key},body:JSON.stringify({contents:[{parts}],generationConfig:{responseModalities:['TEXT','IMAGE'],responseFormat:{image:{aspectRatio:aspect_ratio||'1:1',imageSize:image_size||'1K'}}})});
       const j = await r.json().catch(() => ({}));
       if(!r.ok) return { error:(j.error && j.error.message) || ('HTTP ' + r.status) };
       const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
@@ -694,7 +694,7 @@ registerProcessor('mic-down',Mic);`;
 
 /* ───────── Live session ───────── */
 const Live = {
-  ws:null, ready:false, active:false, muted:false, handle:null, variant:0, tries:0, gotSetup:false, everReady:false,
+  ws:null, ready:false, active:false, ephemeralToken:'', muted:false, handle:null, variant:0, tries:0, gotSetup:false, everReady:false,
   ctx:null, stream:null, node:null, inAn:null, outAn:null, gain:null, nextT:0, srcs:new Set(), ub:null, ab:null, wake:null, watch:null, greeted:false,
 
   speakingNow(){ return !!this.ctx && this.ctx.currentTime < this.nextT + .35; },
@@ -715,7 +715,7 @@ const Live = {
   send(o){ if(this.ws && this.ws.readyState === 1) this.ws.send(JSON.stringify(o)); },
 
   async start(){
-    if(!S.key){ openSheet('shSet'); toast('اول کلید API رو وارد کن'); return; }
+    if(!S.proxy && !S.key){ openSheet('shSet'); toast('اتصال API را در تنظیمات وارد کن'); return; }
     setState('connecting'); $('#mic').classList.add('live'); $('#btnMute').style.display = '';
     try{
       const AC = window.AudioContext || window.webkitAudioContext;
@@ -743,6 +743,7 @@ const Live = {
     }
     try{ if(navigator.wakeLock) this.wake = await navigator.wakeLock.request('screen'); }catch(e){}
     this.active = true; this.variant = 0; this.tries = 0; this.handle = null; this.greeted = false;
+    if(S.proxy){ try{ const tr=await fetch(S.proxy,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'live_token',model:S.model,voice:S.voice})}); const tj=await tr.json(); if(!tr.ok || !tj.token) throw new Error(tj.error||'توکن Live نگرفت'); this.ephemeralToken=tj.token; }catch(e){ return this.fail('اتصال امن Live آماده نشد: '+(e.message||e)); } }
     this.watch = setInterval(() => {
       if(!this.active || !this.ready) return;
       if(this.speakingNow() && state !== 'thinking' && state !== 'drawing') setState('speaking');
@@ -755,7 +756,7 @@ const Live = {
     const v = this.variants()[this.variant];
     setState('connecting');
     let ws;
-    try{ ws = new WebSocket((LS.get('jv_ws', '') || WS_BASE) + '?key=' + encodeURIComponent(S.key)); }
+    try{ ws = new WebSocket((LS.get('jv_ws', '') || WS_BASE) + '?' + (S.proxy ? 'access_token=' + encodeURIComponent(this.ephemeralToken) : 'key=' + encodeURIComponent(S.key))); }
     catch(e){ return this.fail('ساخت اتصال ممکن نشد: ' + e.message); }
     ws.binaryType = 'arraybuffer'; this.ws = ws; this.gotSetup = false; this.ready = false;
     ws.onopen = () => ws.send(JSON.stringify({ setup:this.buildSetup(v) }));
@@ -921,12 +922,15 @@ $('#chips').addEventListener('click', e => {
   const b = e.target.closest('.chip'); if(!b) return;
   ({
     cam: snapCamera, screen: openScreen, gallery: () => pickShot('photo'),
-    img: () => prefill('یه تصویر بساز از '), open: () => openSheet('shApps'), lists: () => openSheet('shLists'),
+    img: () => openImageStudio(), imageStudio: () => openImageStudio(), upload: () => pickShot('image-edit'), open: () => openSheet('shApps'), lists: () => openSheet('shLists'),
     weather: () => ask('هوای اینجا چطوره؟'), timer: () => ask('یه تایمر ۵ دقیقه‌ای بذار')
   })[b.dataset.a]();
 });
 
 /* ───────── sheets ───────── */
+async function openImageStudio(){ openSheet('shImage'); setTimeout(() => $('#imgPrompt').focus(), 50); }
+async function makeImageFromStudio(){ const p=$('#imgPrompt').value.trim(); if(!p){ toast('توضیح تصویر را بنویس'); return; } closeSheets(); await runTool('generate_image',{prompt:p,aspect_ratio:$('#imgRatio').value,image_size:$('#imgSize').value,image_b64:window.__editImageB64||''}); window.__editImageB64=''; }
+$('#imgGo').onclick=makeImageFromStudio;
 function openSheet(id){ $('#' + id).classList.add('open'); if(id === 'shSet') fillSettings(); if(id === 'shMem') renderMem(); if(id === 'shLists') renderLists(); if(id === 'shScreen') $('#scLive').style.display = canDisplay ? '' : 'none'; }
 function closeSheets(){ document.querySelectorAll('.sheet').forEach(s => s.classList.remove('open')); if(prev.hue != null || prev.hair != null){ prev.hue = prev.hair = null; applyTheme(); } }
 document.querySelectorAll('[data-close]').forEach(b => b.onclick = closeSheets);
@@ -936,13 +940,13 @@ $('#btnMem').onclick = () => openSheet('shMem');
 $('#btnLists').onclick = () => openSheet('shLists');
 $('#sVoice').innerHTML = VOICES.map(v => `<option>${v}</option>`).join('');
 function fillSettings(){
-  $('#sKey').value = S.key; $('#sName').value = S.name; $('#sUser').value = S.user; $('#sVoice').value = S.voice; $('#sHue').value = S.hue; $('#sHair').value = S.hair;
+  $('#sKey').value = S.key; $('#sProxy').value = S.proxy || ''; $('#sName').value = S.name; $('#sUser').value = S.user; $('#sVoice').value = S.voice; $('#sHue').value = S.hue; $('#sHair').value = S.hair;
   $('#sInt').checked = S.interrupt; $('#sTts').checked = S.tts; $('#sModel').value = S.model; $('#sTModel').value = S.tmodel; $('#sIModel').value = S.imodel; $('#sShortcut').value = S.shortcut;
 }
 $('#sHue').oninput = e => { prev.hue = +e.target.value; applyTheme(prev.hue); };
 $('#sHair').oninput = e => { prev.hair = +e.target.value; };
 $('#sSave').onclick = () => {
-  Object.assign(S, { key:$('#sKey').value.trim(), name:$('#sName').value.trim() || 'جارویس', user:$('#sUser').value.trim(), voice:$('#sVoice').value,
+  Object.assign(S, { key:$('#sKey').value.trim(), proxy:$('#sProxy').value.trim() || DEF.proxy, name:$('#sName').value.trim() || 'جارویس', user:$('#sUser').value.trim(), voice:$('#sVoice').value,
     hue:+$('#sHue').value, hair:+$('#sHair').value, interrupt:$('#sInt').checked, tts:$('#sTts').checked,
     model:$('#sModel').value.trim() || DEF.model, tmodel:$('#sTModel').value.trim() || DEF.tmodel, imodel:$('#sIModel').value.trim() || DEF.imodel, shortcut:$('#sShortcut').value.trim() || DEF.shortcut });
   prev.hue = prev.hair = null; saveS(); applyTheme(); closeSheets(); logEl.querySelector('.empty') && (logEl.innerHTML = '', showEmpty());
