@@ -17,7 +17,7 @@
 ## راه‌اندازی (یک‌بار)
 1. کلید رایگان بگیر: https://aistudio.google.com/apikey
 2. برای **نسخه‌ی عمومیِ کامل** پروژه را روی **Cloudflare Pages** منتشر کن؛ این پروژه از Pages Functions برای API استفاده می‌کند.
-3. در Cloudflare داخل Workers & Pages → پروژه → Settings → Variables and Secrets یک **Secret** با نام `GEMINI_API_KEY` بساز و کلید Gemini را داخل آن قرار بده. کلید را داخل GitHub commit نکن. citeturn0search0turn0search4
+3. در Cloudflare داخل Workers & Pages → پروژه → Settings → Variables and Secrets یک **Secret** با نام `GEMINI_API_KEY` بساز و کلید Gemini را داخل آن قرار بده. کلید را داخل GitHub commit نکن.
 4. بعد از Deploy، لینک Cloudflare Pages را در **Safari** آیفون باز کن ← Share ← **Add to Home Screen**.
 5. برنامه را باز کن؛ برای نسخه‌ی عمومی لازم نیست کلید را داخل ⚙️ وارد کنی. آدرس API به‌صورت پیش‌فرض `/api/gemini` است. بعد دکمه‌ی میکروفون یا «🎨 تصویر بساز» را بزن.
 
@@ -26,7 +26,7 @@
 - فایل `functions/api/gemini.js` API را اجرا می‌کند و مسیر آن `/api/gemini` است.
 - اگر `GEMINI_API_KEY` تنظیم نشده باشد، متن، Live و تولید تصویر خطای اتصال می‌دهند.
 - برای امنیت بیشتر می‌توانی `JARVIS_ALLOWED_ORIGIN` را هم به‌عنوان متغیر/Secret روی آدرس دقیق سایتت بگذاری.
-- Cloudflare می‌تواند فایل‌های استاتیک و Worker/Function را در یک پروژه سرو کند. citeturn0search3turn0search12
+- Cloudflare می‌تواند فایل‌های استاتیک و Worker/Function را در یک پروژه سرو کند.
 - بعد از Deploy، اگر Safari نسخه‌ی قدیمی را نشان داد، صفحه را یک‌بار Refresh کن یا PWA را کامل ببند و دوباره باز کن. نسخه‌ی service worker در این release bump شده است.
 
 > اگر نسخه‌ی قبلی رو آپلود کرده بودی: فایل `orb3d.js` دیگه لازم نیست و می‌تونی پاکش کنی. فایل جدید `char.js` رو حتماً کنار `index.html` بگذار. برای اینکه گوشی نسخه‌ی جدید رو بگیره، برنامه رو یک بار کامل ببند و دوباره باز کن.
