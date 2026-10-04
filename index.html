@@ -218,7 +218,7 @@ const DEF = { key:'', proxy:'/api/gemini', name:'جارویس', user:'', voice:'
   imodel:'gemini-3.1-flash-image', shortcut:'OpenApp', interrupt:false, tts:true, ver:4 };
 const S = Object.assign({}, DEF, LS.get('jv_settings', {}));
 const saveS = () => LS.set('jv_settings', S);
-if(S.ver !== 4 || S.proxy == null){ S.hue = S.hue ?? DEF.hue; S.hair = S.hair ?? DEF.hair; S.proxy = S.proxy || DEF.proxy; S.ver = 4; saveS(); }
+if(S.ver !== 4 || !S.proxy){ S.hue = S.hue ?? DEF.hue; S.hair = S.hair ?? DEF.hair; S.proxy = S.proxy || DEF.proxy; S.ver = 4; saveS(); }
 const prev = { hue:null, hair:null };
 function applyTheme(h){ document.documentElement.style.setProperty('--h', h == null ? S.hue : h); $('#title').textContent = S.name; }
 
@@ -417,7 +417,7 @@ function showGenImage(b64, mime){
 }
 let fileKind = 'photo';
 function deliverImage(b64, kind){
-  if(!S.key){ openSheet('shSet'); return; }
+  if(!S.proxy && !S.key){ openSheet('shSet'); toast('اتصال API را در تنظیمات وارد کن'); return; }
   closeSheets(); addImg(b64);
   const q = $('#txt').value.trim(); $('#txt').value = ''; $('#txt').style.height = ''; $('#bar').classList.remove('typing');
   if(q) addMsg('u', q);
@@ -637,8 +637,8 @@ let toastT; function toast(t){ const e = $('#toast'); e.textContent = t; e.class
 function showEmpty(){
   if(logEl.children.length) return;
   const e = document.createElement('div'); e.className = 'empty';
-  e.innerHTML = S.key ? `روی <b>میکروفون</b> بزن و حرف بزن، یا پایین تایپ کن.<br><br>مثلاً: «اینستاگرام رو باز کن»، «یه تصویر از غروب بساز»، «صفحه‌ی گوشیم رو ببین»` :
-    `به <b>${S.name}</b> خوش اومدی.<br>اول از دکمه‌ی ⚙️ بالا، <b>کلید Gemini API</b> رو وارد کن.`;
+  e.innerHTML = (S.proxy || S.key) ? `روی <b>میکروفون</b> بزن و حرف بزن، یا پایین تایپ کن.<br><br>مثلاً: «اینستاگرام رو باز کن»، «یه تصویر از غروب بساز»، «صفحه‌ی گوشیم رو ببین»` :
+    `به <b>${S.name}</b> خوش اومدی.<br>اول از دکمه‌ی ⚙️ بالا، اتصال API رو تنظیم کن.`;
   logEl.appendChild(e);
 }
 
@@ -916,7 +916,7 @@ $('#mic').onclick = () => { Live.active ? Live.stop() : Live.start(); };
 $('#btnMute').onclick = () => { Live.muted = !Live.muted; $('#btnMute').classList.toggle('warn', Live.muted); toast(Live.muted ? 'میکروفون قطع شد' : 'میکروفون وصل شد'); };
 $('#file').onchange = async e => {
   const f = e.target.files[0]; e.target.value = ''; const kind = fileKind; fileKind = 'photo'; if(!f) return;
-  if(!S.key){ openSheet('shSet'); return; }
+  if(!S.proxy && !S.key){ openSheet('shSet'); toast('اتصال API را در تنظیمات وارد کن'); return; }
   useBlob(f, kind);
 };
 $('#chips').addEventListener('click', e => {
