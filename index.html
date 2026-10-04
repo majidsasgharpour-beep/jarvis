@@ -214,11 +214,11 @@ const VOICES = ['Charon','Puck','Kore','Fenrir','Aoede'];
 const WS_BASE = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent';
 
 /* ───────── settings ───────── */
-const DEF = { key:'', name:'جارویس', user:'', voice:'Charon', hue:270, hair:325, model:'gemini-3.8-live', tmodel:'gemini-3.8-flash',
+const DEF = { key:'', proxy:'/api/gemini', name:'جارویس', user:'', voice:'Charon', hue:270, hair:325, model:'gemini-3.8-live', tmodel:'gemini-3.8-flash',
   imodel:'gemini-3.1-flash-image', shortcut:'OpenApp', interrupt:false, tts:true, ver:4 };
 const S = Object.assign({}, DEF, LS.get('jv_settings', {}));
 const saveS = () => LS.set('jv_settings', S);
-if(S.ver !== 4){ S.hue = DEF.hue; S.hair = DEF.hair; S.ver = 4; if(S.proxy == null) S.proxy = DEF.proxy; saveS(); }
+if(S.ver !== 4 || S.proxy == null){ S.hue = S.hue ?? DEF.hue; S.hair = S.hair ?? DEF.hair; S.proxy = S.proxy || DEF.proxy; S.ver = 4; saveS(); }
 const prev = { hue:null, hair:null };
 function applyTheme(h){ document.documentElement.style.setProperty('--h', h == null ? S.hue : h); $('#title').textContent = S.name; }
 
@@ -898,7 +898,7 @@ function speak(text){
 
 /* ───────── input wiring ───────── */
 function ask(t){
-  if(!S.key){ openSheet('shSet'); toast('اول کلید API رو وارد کن'); return; }
+  if(!S.proxy && !S.key){ openSheet('shSet'); toast('اتصال API را در تنظیمات وارد کن'); return; }
   addMsg('u', t);
   if(Live.ready){ Live.ub = null; Live.sendText(t); } else textChat(t);
 }
