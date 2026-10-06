@@ -122,6 +122,11 @@ html,body{background:#04080f!important;color:#dfeaf3!important}body{font-family:
 .ib{border:1px solid rgba(245,166,35,.24)!important;border-radius:9px!important;background:rgba(7,19,31,.9)!important;color:#f5a623!important;width:48px!important;height:48px!important;pointer-events:auto!important}#mic{width:52px!important;height:52px!important;border-radius:10px!important;background:rgba(245,166,35,.12)!important;border:1px solid rgba(245,166,35,.45)!important;color:#ffd080!important;box-shadow:0 0 24px rgba(245,166,35,.1)!important}#mic.live{background:rgba(255,77,109,.18)!important;border-color:#ff6b6b!important}#send{background:rgba(0,229,255,.14)!important;border-color:rgba(0,229,255,.45)!important;color:#5fe0f2!important}#btnMute{background:rgba(255,77,109,.12)!important;color:#ff7b7b!important}
 .sheet{z-index:60!important;background:rgba(0,0,0,.72)!important;backdrop-filter:blur(8px)!important}.sheet .in{background:#07131f!important;border:1px solid rgba(245,166,35,.2)!important;border-bottom:0!important}.btn,.f{background:#0b1b2a!important;border:1px solid rgba(245,166,35,.18)!important}.btn.pri,.btn.big{background:rgba(245,166,35,.16)!important;color:#ffd080!important;border:1px solid rgba(245,166,35,.4)!important}#toast{background:#07131f!important;border:1px solid rgba(245,166,35,.3)!important;color:#dfeaf3!important}
 @media(max-width:700px){#log{top:150px!important;bottom:158px!important;left:10px!important;right:10px!important;padding:10px!important}#chips{justify-content:flex-start!important;overflow-x:auto!important;bottom:75px!important}.chip{flex:0 0 auto!important}.msg{max-width:92%!important}}</style>
+<style id="apex-command-glyphs">
+/* APEX command glyphs */
+.chip::before{content:"";display:inline-block;width:5px;height:5px;border:1px solid #f5a623;border-radius:50%;margin-left:6px;vertical-align:1px;box-shadow:0 0 7px rgba(245,166,35,.55)}
+.chip{letter-spacing:.12em!important}
+</style>
 </style>
 <link rel="stylesheet" href="apex-world.css">
 <script src="apex-orb.js"></script>
@@ -141,14 +146,14 @@ html,body{background:#04080f!important;color:#dfeaf3!important}body{font-family:
   <div id="stage"><canvas id="orb"></canvas><div id="status">آماده</div></div>
   <div id="log"></div>
   <div id="chips">
-    <button class="chip" style="--cc:#34d399" data-a="cam">📷 دوربین</button>
-    <button class="chip" style="--cc:#fb923c" data-a="screen">🖥 صفحه</button>
-    <button class="chip" style="--cc:#c084fc" data-a="img">🎨 تصویر بساز</button><button class="chip" style="--cc:#e879f9" data-a="imageStudio">🪄 استودیو تصویر</button><button class="chip" style="--cc:#60a5fa" data-a="upload">📎 عکس من</button>
-    <button class="chip" style="--cc:#38bdf8" data-a="gallery">🖼 عکس</button>
-    <button class="chip" style="--cc:#f472b6" data-a="open">🚀 برنامه‌ها</button>
-    <button class="chip" style="--cc:#fde047" data-a="weather">🌤 هوا</button>
-    <button class="chip" style="--cc:#2dd4bf" data-a="lists">📝 کارها</button>
-    <button class="chip" style="--cc:#fb7185" data-a="timer">⏱ تایمر</button>
+    <button class="chip" style="--cc:#34d399" data-a="cam">CAMERA</button>
+    <button class="chip" style="--cc:#fb923c" data-a="screen">SCREEN</button>
+    <button class="chip" style="--cc:#c084fc" data-a="img">CREATE</button><button class="chip" style="--cc:#e879f9" data-a="imageStudio">STUDIO</button><button class="chip" style="--cc:#60a5fa" data-a="upload">UPLOAD</button>
+    <button class="chip" style="--cc:#38bdf8" data-a="gallery">GALLERY</button>
+    <button class="chip" style="--cc:#f472b6" data-a="open">APPS</button>
+    <button class="chip" style="--cc:#fde047" data-a="weather">WEATHER</button>
+    <button class="chip" style="--cc:#2dd4bf" data-a="lists">TASKS</button>
+    <button class="chip" style="--cc:#fb7185" data-a="timer">TIMER</button>
   </div>
   <div id="bar">
     <button class="ib" id="btnMute" aria-label="قطع میکروفون" style="display:none"><svg viewBox="0 0 24 24"><path d="M1 1l22 22M9 9v3a3 3 0 0 0 5.1 2.1M15 9.3V4a3 3 0 0 0-5.9-.8M17 16.9A7 7 0 0 1 5 12v-2M19 10v2a7 7 0 0 1-.1 1.2M12 19v4M8 23h8"/></svg></button>
