@@ -1,12 +1,13 @@
 /* ورودیِ بیلدِ ایستا برای جارویس: همان کامپوننت‌های APEX-UI (حلقه‌ی طلایی، گراف عامل‌ها،
    پس‌زمینه‌ی شیدر، نوار وضعیت) بدون Next.js. هسته‌ی ذرات سه‌بعدی (three / react-three-fiber)
-   در این بیلد نیست. API: window.ApexWorld = { setState, setLevel, poke } */
+   جایگزین شده با Core.jsx (Canvas دوبعدی). API: window.ApexWorld = { setState, setLevel, poke } */
 import React, { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import ApexOrb from './components/ApexOrb'
 import ReasoningWeb from './components/ReasoningWeb'
 import ShaderBackground from './components/ShaderBackground'
 import OrbStatusBar from './components/OrbStatusBar'
+import ParticleCore from './Core'
 import './components/apex-orb.css'
 import './extra.css'
 
@@ -21,7 +22,7 @@ const api = {
 }
 
 /* حلقه‌ی طلاییِ APEX داخل صحنه‌ی ۹۰۰×۹۰۰ که با اندازه‌ی کادر مقیاس می‌شود */
-function HeroOrb({ state }) {
+function HeroOrb({ state, reduced }) {
   const box = useRef(null)
   const [scale, setScale] = useState(0.6)
   useEffect(() => {
@@ -39,6 +40,7 @@ function HeroOrb({ state }) {
         <div style={{ position: 'absolute', left: 0, top: (900 - 520) / 2 }}>
           <ApexOrb state={state} variant="frame" />
         </div>
+        {!reduced && <ParticleCore state={state} scale={scale} />}
       </div>
     </div>
   )
@@ -108,7 +110,7 @@ function World() {
             <ReasoningWeb state={web} mode="full" coreless onSelect={() => {}} />
           </div>
           <div ref={pulse} style={{ position: 'absolute', inset: 0, transformOrigin: '50% 50%' }}>
-            <HeroOrb state={state} />
+            <HeroOrb state={state} reduced={reduced} />
           </div>
         </div>
         <div style={{ position: 'absolute', left: '50%', bottom: 0, width: 420, height: 150, transform: 'translateX(-50%) scale(.66)', transformOrigin: '50% 100%' }}>

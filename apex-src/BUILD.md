@@ -1,7 +1,7 @@
 # ساخت دوباره‌ی apex-world.js / apex-world.css
 
-سورس از [APEX-UI](https://github.com/RubenM1990/APEX-UI) (MIT) است. هسته‌ی ذرات سه‌بعدی (three / react-three-fiber) در این بیلد نیست.
-نیازمندی: `esbuild` و `react` / `react-dom` نسخه‌ی ۱۹ (در دسترس از node_modules).
+سورس از [APEX-UI](https://github.com/RubenM1990/APEX-UI) (MIT) است. هسته‌ی ذرات در `Core.jsx` روی Canvas دوبعدی بازنویسی شده (بدون three / react-three-fiber).
+نیازمندی (فقط): `esbuild` و `react` / `react-dom` نسخه‌ی ۱۹ (در دسترس از node_modules).
 
 ```bash
 cd apex-src
