@@ -1,0 +1,5 @@
+/* از app/globals.css (APEX-UI) */
+@keyframes agentPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.sb-hint{display:none}
+[data-apex-stage] canvas{width:100%!important;height:100%!important}
+#apexWorld{position:fixed;inset:0;z-index:0;pointer-events:none}

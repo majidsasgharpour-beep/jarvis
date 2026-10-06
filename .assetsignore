@@ -9,3 +9,5 @@ functions/
 .git/
 .github/
 api-core.js
+apex-src/
+CREDITS-APEX-UI.md
