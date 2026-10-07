@@ -35,7 +35,7 @@ function App() {
       placeholder="بنویس یا با جارویس صحبت کن…"
       onSend={(message) => sendToJarvis(message)}
       onVoiceToggle={toggleJarvisVoice}
-      className="jarvis-react-prompt"
+      className="jarvis-react-prompt fixed bottom-3 left-3 right-3 z-[31] mx-auto max-w-[900px]"
     />
   );
 }
