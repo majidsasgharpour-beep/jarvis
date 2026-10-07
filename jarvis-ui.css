@@ -33,21 +33,6 @@ header h1{margin:0;flex:1;font-size:14px;font-weight:600;color:#d9e4eb}.ib{width
 
 html.jarvis-active #stage:before{animation:core .45s ease-out 1}#app[data-state="listening"] #stage:before{box-shadow:0 0 70px rgba(52,211,153,.24),0 0 130px rgba(52,211,153,.08)}#app[data-state="speaking"] #stage:before{box-shadow:0 0 75px rgba(125,211,252,.3),0 0 150px rgba(167,139,250,.12)}#app[data-state="thinking"] #stage:before{box-shadow:0 0 70px rgba(167,139,250,.28),0 0 140px rgba(125,211,252,.08)}
 
-/* Animated Jarvis avatar */
-#jarvis-avatar{position:relative;width:150px;height:150px;border-radius:40%;display:flex;align-items:center;justify-content:center;gap:22px;overflow:hidden;background:radial-gradient(circle at 50% 45%,#0d4d9a 0%,#3d7dd8 40%,#6fb3ff 68%,#e0eeff 100%);box-shadow:0 0 5px rgba(111,179,255,.5),0 0 28px 8px rgba(20,102,216,.22),inset 0 0 0 1px rgba(255,255,255,.08);z-index:2;transition:.35s}
-#jarvis-avatar:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 30% 24%,rgba(255,255,255,.75),rgba(255,255,255,.1) 50%,transparent 70%);pointer-events:none}
-#jarvis-avatar:after{content:"";position:absolute;inset:0;opacity:.12;mix-blend-mode:overlay;background-image:radial-gradient(rgba(255,255,255,.8) .7px,transparent .8px);background-size:4px 4px;pointer-events:none}
-.jarvis-eye{position:relative;z-index:2;width:12px;height:24px;border-radius:999px;background:linear-gradient(135deg,#fff,#d4ecff);box-shadow:0 0 12px rgba(255,255,255,.45);animation:jarvis-blink 3.6s ease-in-out infinite}
-.jarvis-eye-b{animation-delay:60ms}
-@keyframes jarvis-blink{0%,88%,100%{transform:scaleY(1)}93%,97%{transform:scaleY:.07}}
-html.jarvis-active #jarvis-avatar{transform:scale(1.08);box-shadow:0 0 20px rgba(111,179,255,.65),0 0 60px rgba(20,102,216,.3)}
-#app[data-state="listening"] #jarvis-avatar{animation:avatar-listen 1.8s ease-in-out infinite}
-#app[data-state="speaking"] #jarvis-avatar{animation:avatar-speak .65s ease-in-out infinite}
-#app[data-state="thinking"] #jarvis-avatar{animation:avatar-think 1.2s ease-in-out infinite}
-@keyframes avatar-listen{50%{transform:scale(1.045)}}
-@keyframes avatar-speak{50%{transform:scale(1.07)}}
-@keyframes avatar-think{50%{transform:rotate(2deg) scale(1.025)}}
-@media(max-width:480px){#jarvis-avatar{width:128px;height:128px;gap:19px}.jarvis-eye{width:10px;height:21px}}
 
 
 /* Premium composer states */
@@ -66,10 +51,6 @@ html.jarvis-active #jarvis-avatar{transform:scale(1.08);box-shadow:0 0 20px rgba
 #stage{isolation:isolate}
 #stage:before{z-index:0}
 #stage:after{z-index:0}
-#jarvis-avatar{z-index:3;cursor:pointer;transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s}
-#jarvis-avatar:focus-visible{outline:2px solid var(--accent);outline-offset:5px}
-#jarvis-avatar:before{animation:avatar-shine 5s ease-in-out infinite}
-@keyframes avatar-shine{0%,100%{opacity:.55;transform:translateX(-3%)}50%{opacity:.9;transform:translateX(4%)}}
 #log{position:relative}
 #log:before{content:"";display:block;position:sticky;top:-10px;height:1px;flex:0 0 1px}
 .empty{align-self:center;max-width:440px;margin:auto;padding:18px 20px;border:1px solid rgba(125,211,252,.1);border-radius:20px;background:linear-gradient(145deg,rgba(13,21,30,.78),rgba(20,16,32,.62));box-shadow:0 18px 55px rgba(0,0,0,.2);color:#8493a0;text-align:center;font-size:12px;line-height:2}
@@ -114,7 +95,6 @@ html.jarvis-active #jarvis-avatar{transform:scale(1.08);box-shadow:0 0 20px rgba
 @media(min-width:760px){
   #app{grid-template-rows:auto 1fr auto}
   #stage{height:min(43dvh,430px)}
-  #jarvis-avatar{width:172px;height:172px}
   #log{max-width:980px;width:100%;margin:auto}
   #composer{padding-left:max(14px,calc((100% - 900px)/2));padding-right:max(14px,calc((100% - 900px)/2))}
 }
@@ -131,102 +111,12 @@ html.jarvis-active #jarvis-avatar{transform:scale(1.08);box-shadow:0 0 20px rgba
   *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
 
-/* Live animated eyes and thinking feedback */
-.jarvis-eye{transform-origin:50% 50%;will-change:transform,filter}
-#app[data-state="listening"] .jarvis-eye{animation:jarvis-listen-eyes 1.45s ease-in-out infinite}
-#app[data-state="listening"] .jarvis-eye-b{animation-delay:.08s}
-#app[data-state="speaking"] .jarvis-eye{animation:jarvis-speak-eyes .42s ease-in-out infinite}
-#app[data-state="speaking"] .jarvis-eye-b{animation-delay:.07s}
-#app[data-state="thinking"] .jarvis-eye{animation:jarvis-think-eyes 1.05s ease-in-out infinite}
-#app[data-state="thinking"] .jarvis-eye-b{animation-delay:.16s}
-@keyframes jarvis-listen-eyes{0%,100%{transform:translate(0,0) scaleY(1);filter:brightness(1)}35%{transform:translate(-2px,-1px) scaleY(.92);filter:brightness(1.15)}68%{transform:translate(2px,1px) scaleY(1.05);filter:brightness(1.05)}}
-@keyframes jarvis-speak-eyes{0%,100%{transform:scaleY(1) scaleX(1);filter:brightness(1)}28%{transform:scaleY(.72) scaleX(1.08);filter:brightness(1.25)}52%{transform:scaleY(1.12) scaleX(.94);filter:brightness(1.5)}78%{transform:scaleY(.82) scaleX(1.05);filter:brightness(1.18)}}
-@keyframes jarvis-think-eyes{0%,100%{transform:translate(-2px,0) scaleY(1);filter:brightness(1)}25%{transform:translate(2px,-1px) scaleY(.9);filter:brightness(1.18)}50%{transform:translate(3px,1px) scaleY(1.05);filter:brightness(1.35)}75%{transform:translate(-3px,0) scaleY(.94);filter:brightness(1.12)}}
-.jarvis-eye:after{content:"";position:absolute;inset:2px 3px;border-radius:inherit;background:rgba(255,255,255,.9);opacity:.45;filter:blur(1px);animation:eye-glint 1.8s ease-in-out infinite}
-@keyframes eye-glint{50%{opacity:.9;transform:translateY(-2px)}}
 .thinking-row{align-self:flex-end;display:flex;align-items:center;gap:8px;max-width:min(720px,88%);padding:9px 13px;border:1px solid rgba(167,139,250,.22);border-radius:16px 16px 5px 16px;background:rgba(24,20,38,.82);color:#b9a9e8;font-size:12px;animation:msg-in .2s ease-out}
 .thinking-dots{display:flex;gap:4px;direction:ltr}.thinking-dots i{width:5px;height:5px;border-radius:50%;background:#c4b5fd;animation:thinking-dot 1s ease-in-out infinite}.thinking-dots i:nth-child(2){animation-delay:.14s}.thinking-dots i:nth-child(3){animation-delay:.28s}
 @keyframes thinking-dot{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-4px);opacity:1}}
 #composer[data-modes*="think"] #txt{border-color:rgba(167,139,250,.28)}
 
-
-/* ===== Supplied React avatar integration ===== */
-/* The old CSS orb/core must never sit in front of the supplied avatar. */
-#stage:before,
-#stage:after {
-  display: none !important;
-}
-#jarvis-react-avatar {
-  position: relative;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: auto;
-  height: auto;
-  background: transparent;
-  box-shadow: none;
-  overflow: visible;
-}
-
-/* The supplied avatar has its own blink. During live states, only the eyes
-   receive state animation; the avatar artwork itself is not recolored or rebuilt. */
-#app[data-state="listening"] #jarvis-react-avatar > div > div:last-child > div,
-#app[data-state="speaking"] #jarvis-react-avatar > div > div:last-child > div {
-  transform-origin: 50% 50%;
-}
-
-#app[data-state="listening"] #jarvis-react-avatar > div > div:last-child > div {
-  animation: supplied-avatar-listen 1.25s ease-in-out infinite !important;
-}
-#app[data-state="listening"] #jarvis-react-avatar > div > div:last-child > div:nth-child(2) {
-  animation-delay: 80ms !important;
-}
-#app[data-state="speaking"] #jarvis-react-avatar > div > div:last-child > div {
-  animation: supplied-avatar-speak .42s ease-in-out infinite !important;
-}
-#app[data-state="speaking"] #jarvis-react-avatar > div > div:last-child > div:nth-child(2) {
-  animation-delay: 70ms !important;
-}
-#app[data-state="thinking"] #jarvis-react-avatar > div > div:last-child > div {
-  animation: supplied-avatar-think 1.05s ease-in-out infinite !important;
-}
-#app[data-state="thinking"] #jarvis-react-avatar > div > div:last-child > div:nth-child(2) {
-  animation-delay: 150ms !important;
-}
-
-@keyframes supplied-avatar-listen {
-  0%,100% { transform: translate(0,0) scaleY(1); }
-  35% { transform: translate(-1px,-1px) scaleY(.86); }
-  68% { transform: translate(1px,1px) scaleY(1.08); }
-}
-@keyframes supplied-avatar-speak {
-  0%,100% { transform: scaleY(1) scaleX(1); }
-  28% { transform: scaleY(.68) scaleX(1.08); }
-  52% { transform: scaleY(1.14) scaleX(.94); }
-  78% { transform: scaleY(.76) scaleX(1.06); }
-}
-@keyframes supplied-avatar-think {
-  0%,100% { transform: translate(-1px,0) scaleY(1); }
-  25% { transform: translate(2px,-1px) scaleY(.88); }
-  50% { transform: translate(3px,1px) scaleY(1.06); }
-  75% { transform: translate(-2px,0) scaleY(.92); }
-}
-
-
-/* Final avatar visibility fix */
-#stage {
-  position: relative;
-}
-#jarvis-react-avatar {
-  position: relative !important;
-  z-index: 10 !important;
-  min-width: 48px;
-  min-height: 48px;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-#jarvis-react-avatar > * {
-  visibility: visible !important;
-  opacity: 1 !important;
-}
+/* Avatar: components/ui/components-primitives-avatar.tsx, mounted by src/main.tsx.
+   The old CSS orb and ring on #stage are hidden so nothing sits behind or around it. */
+#stage:before,#stage:after{display:none}
+#jarvis-react-avatar{position:relative;z-index:2;display:flex;align-items:center;justify-content:center}
