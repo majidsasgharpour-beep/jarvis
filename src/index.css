@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*:focus-visible{outline-offset:0!important;--ring-offset:0!important}
+textarea::-webkit-scrollbar{width:6px}
+textarea::-webkit-scrollbar-track{background:transparent}
+textarea::-webkit-scrollbar-thumb{background:#444;border-radius:3px}
+textarea::-webkit-scrollbar-thumb:hover{background:#555}
