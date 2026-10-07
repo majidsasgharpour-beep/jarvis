@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 type PromptInputBoxProps = {
   onSend?: (message: string, files?: File[]) => void;
+  onVoiceToggle?: () => void;
   isLoading?: boolean;
   placeholder?: string;
   className?: string;
@@ -76,7 +77,7 @@ const PromptInputAction: React.FC<{
 const Divider = () => <div className="mx-1 h-6 w-px bg-gradient-to-b from-transparent via-[#9b87f5]/70 to-transparent" />;
 
 export const PromptInputBox = React.forwardRef<HTMLDivElement, PromptInputBoxProps>(
-  ({ onSend = () => {}, isLoading = false, placeholder = "Type your message here...", className }, ref) => {
+  ({ onSend = () => {}, onVoiceToggle = () => {}, isLoading = false, placeholder = "Type your message here...", className }, ref) => {
     const [input, setInput] = React.useState("");
     const [files, setFiles] = React.useState<File[]>([]);
     const [preview, setPreview] = React.useState<string | null>(null);
@@ -109,9 +110,10 @@ export const PromptInputBox = React.forwardRef<HTMLDivElement, PromptInputBoxPro
     const toggleRecording = () => {
       if (recording) {
         if (timer.current) clearInterval(timer.current);
-        onSend(`[Voice message - ${seconds} seconds]`, []);
+        onVoiceToggle();
         setRecording(false); setSeconds(0);
       } else {
+        onVoiceToggle();
         setRecording(true);
         timer.current = setInterval(() => setSeconds(v => v + 1), 1000);
       }
