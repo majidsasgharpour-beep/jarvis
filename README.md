@@ -22,7 +22,7 @@
 5. برنامه را باز کن؛ برای نسخه‌ی عمومی لازم نیست کلید را داخل ⚙️ وارد کنی. آدرس API به‌صورت پیش‌فرض `/api/gemini` است. بعد دکمه‌ی میکروفون یا «🎨 تصویر بساز» را بزن.
 
 ### استقرار با Cloudflare Pages
-- Repository را به Cloudflare Pages وصل کن و ریشه‌ی repository را به‌عنوان پوشه‌ی پروژه انتخاب کن؛ برای این پروژه Build Command لازم نیست.
+- Repository را به Cloudflare Pages وصل کن و ریشه‌ی repository را به‌عنوان پوشه‌ی پروژه انتخاب کن. چون آواتار React/TSX است، پروژه باید بیلد شود: Build Command را `npm run build` و Build output directory را `dist` بگذار (فایل‌های ثابت مثل `apex-orb.js`، `sw.js`، `manifest.webmanifest` و آیکون‌ها داخل `public/` هستند و بدون تغییر به `dist` کپی می‌شوند). برای Workers، `wrangler.jsonc` همین بیلد را خودش اجرا می‌کند و از `dist` سرو می‌کند.
 - فایل `functions/api/gemini.js` API را اجرا می‌کند و مسیر آن `/api/gemini` است.
 - اگر `GEMINI_API_KEY` تنظیم نشده باشد، متن، Live و تولید تصویر خطای اتصال می‌دهند.
 - برای امنیت بیشتر می‌توانی `JARVIS_ALLOWED_ORIGIN` را هم به‌عنوان متغیر/Secret روی آدرس دقیق سایتت بگذاری.
