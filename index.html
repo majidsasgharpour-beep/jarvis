@@ -129,6 +129,9 @@ html,body{background:#04080f!important;color:#dfeaf3!important}body{font-family:
 </style>
 </style>
 <link rel="stylesheet" href="apex-world.css">
+<link rel="stylesheet" href="/react-dist/prompt-box.css">
+<style>#bar{display:none!important}#react-prompt-box{pointer-events:auto}</style>
+<script type="module" src="/react-dist/prompt-box.js"></script>
 <script src="apex-orb.js"></script>
 <script src="apex-world.js" defer></script>
 </head>
@@ -155,6 +158,7 @@ html,body{background:#04080f!important;color:#dfeaf3!important}body{font-family:
     <button class="chip" style="--cc:#2dd4bf" data-a="lists">TASKS</button>
     <button class="chip" style="--cc:#fb7185" data-a="timer">TIMER</button>
   </div>
+  <div id="react-prompt-box" aria-label="ورودی جدید جارویس"></div>
   <div id="bar">
     <button class="ib" id="btnMute" aria-label="قطع میکروفون" style="display:none"><svg viewBox="0 0 24 24"><path d="M1 1l22 22M9 9v3a3 3 0 0 0 5.1 2.1M15 9.3V4a3 3 0 0 0-5.9-.8M17 16.9A7 7 0 0 1 5 12v-2M19 10v2a7 7 0 0 1-.1 1.2M12 19v4M8 23h8"/></svg></button>
     <textarea id="txt" rows="1" placeholder="بنویس یا میکروفون رو بزن…" dir="auto" enterkeyhint="send"></textarea>
