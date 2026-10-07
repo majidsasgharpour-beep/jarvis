@@ -1,19 +1,32 @@
-/* پل بین جارویس و صحنه‌ی APEX (apex-world.js). همان API قبلیِ Char را نگه می‌دارد
-   (poke / pointer / step / paint) تا کد صوتی و حالت‌ها دست‌نخورده بمانند. */
+/* Jarvis visual compatibility layer.
+   The old APEX renderer has been removed. The runtime still expects Char.step/poke,
+   so these small hooks keep voice/state code working while the new UI is rebuilt. */
 (function(){
-'use strict';
-const map = st => st === 'listening' ? 'listening' : st === 'speaking' ? 'speaking'
-  : (st === 'thinking' || st === 'drawing' || st === 'connecting' || st === 'text') ? 'thinking' : 'idle';
-const W = () => window.ApexWorld;
-const Char = {
-  poke(){ const w = W(); if(w) w.poke(); },
-  pointer(){},
-  step(dt, amp, speaking, st, inLvl){
-    const s = map(st), lv = Math.max(0, Math.min(1, Math.max(amp || 0, inLvl || 0)));
-    window.__apexLast = s; window.__apexLvl = lv;
-    const w = W(); if(w) w.setState(s);
-  },
-  paint(){}   // رسم را APEX انجام می‌دهد
-};
-if(typeof module !== 'undefined' && module.exports) module.exports = Char; else window.Char = Char;
+  'use strict';
+  const map = s => s === 'listening' ? 'listening' :
+    s === 'speaking' ? 'speaking' :
+    (s === 'thinking' || s === 'drawing' || s === 'connecting' || s === 'text') ? 'thinking' : 'idle';
+
+  function setState(state){
+    const root=document.getElementById('app');
+    const status=document.getElementById('status');
+    const s=map(state);
+    if(root) root.dataset.state=s;
+    if(status){
+      status.textContent =
+        s==='listening' ? 'در حال شنیدن' :
+        s==='speaking' ? 'در حال صحبت' :
+        s==='thinking' ? 'در حال پردازش' : 'آماده';
+    }
+  }
+
+  const Char={
+    poke(){ document.documentElement.classList.add('jarvis-active'); setTimeout(()=>document.documentElement.classList.remove('jarvis-active'),450); },
+    pointer(){},
+    step(dt,amp,speaking,state,inLvl){ setState(state); },
+    paint(){}
+  };
+
+  if(typeof module!=='undefined' && module.exports) module.exports=Char;
+  else window.Char=Char;
 })();
