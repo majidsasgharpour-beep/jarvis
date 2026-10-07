@@ -722,10 +722,11 @@ const Live = {
         if(p.inlineData && p.inlineData.data && /audio/.test(p.inlineData.mimeType || 'audio')) this.play(p.inlineData.data);
       }
       if(sc.outputTranscription && sc.outputTranscription.text){
+        hideThinking();
         this.ub = null;
         if(!this.ab) this.ab = addMsg('a', ''); this.ab.textContent += sc.outputTranscription.text; scrollLog();
       }
-      if(sc.turnComplete){ this.ub = null; this.ab = null; if(!this.speakingNow() && state !== 'idle') setState('listening'); }
+      if(sc.turnComplete){ hideThinking(); this.ub = null; this.ab = null; if(!this.speakingNow() && state !== 'idle') setState('listening'); }
     }
     if(m.toolCall && m.toolCall.functionCalls) this.onTools(m.toolCall.functionCalls);
   },
@@ -774,8 +775,11 @@ const Live = {
 /* ───────── text mode (REST) ───────── */
 const hist = [];
 let busyText = false;
+let thinkingRow = null;
+function showThinking(label='در حال فکر کردن…'){ hideThinking(); thinkingRow=document.createElement('div'); thinkingRow.className='thinking-row'; thinkingRow.innerHTML='<span>'+esc(label)+'</span><span class="thinking-dots"><i></i><i></i><i></i></span>'; logEl.appendChild(thinkingRow); scrollLog(); }
+function hideThinking(){ if(thinkingRow){ thinkingRow.remove(); thinkingRow=null; } }
 async function textChat(userText, imageB64){
-  if(busyText) return; busyText = true; setState('text');
+  if(busyText) return; busyText = true; setState('text'); showThinking(composerModes.think ? 'جارویس دارد عمیق‌تر فکر می‌کند…' : 'در حال فکر کردن…');
   const parts = []; if(imageB64) parts.push({ inlineData:{ mimeType:'image/jpeg', data:imageB64 } }); if(userText) parts.push({ text:userText });
   hist.push({ role:'user', parts });
   try{
@@ -797,7 +801,7 @@ async function textChat(userText, imageB64){
       const calls = content.parts.filter(p => p.functionCall);
       if(!calls.length){
         const text = content.parts.filter(p => p.text && !p.thought).map(p => p.text).join('').trim();
-        if(text){ addMsg('a', text); speak(text); }
+        if(text){ hideThinking(); addMsg('a', text); speak(text); }
         break;
       }
       setState('thinking');
@@ -809,8 +813,8 @@ async function textChat(userText, imageB64){
       }
       hist.push({ role:'user', parts:[...resp, ...extra] });
     }
-  }catch(e){ addMsg('s err', 'خطا: ' + (e.message || e)); }
-  busyText = false; setState(Live.active ? 'listening' : 'idle');
+  }catch(e){ hideThinking(); addMsg('s err', 'خطا: ' + (e.message || e)); }
+  hideThinking(); busyText = false; setState(Live.active ? 'listening' : 'idle');
 }
 function speak(text){
   if(!S.tts || !window.speechSynthesis) return;
@@ -849,7 +853,7 @@ function ask(t){
   if(!S.proxy && !S.key){ openSheet('shSet'); toast('اتصال API را در تنظیمات وارد کن'); return; }
   const finalText = buildComposerPrompt(t);
   addMsg('u', t);
-  if(Live.ready){ Live.ub = null; Live.sendText(finalText); } else textChat(finalText);
+  if(Live.ready){ Live.ub = null; Live.sendText(finalText); showThinking(composerModes.think ? 'جارویس دارد عمیق‌تر فکر می‌کند…' : 'در حال پاسخ‌گویی…'); } else textChat(finalText);
 }
 function submitText(){
   const t = $('#txt').value.trim(); if(!t) return;
