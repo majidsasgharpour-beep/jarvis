@@ -38,14 +38,23 @@
     <button class="chip" style="--cc:#2dd4bf" data-a="lists">TASKS</button>
     <button class="chip" style="--cc:#fb7185" data-a="timer">TIMER</button>
   </div>
-  <div id="bar">
-    <button class="ib" id="btnMute" aria-label="قطع میکروفون" style="display:none"><svg viewBox="0 0 24 24"><path d="M1 1l22 22M9 9v3a3 3 0 0 0 5.1 2.1M15 9.3V4a3 3 0 0 0-5.9-.8M17 16.9A7 7 0 0 1 5 12v-2M19 10v2a7 7 0 0 1-.1 1.2M12 19v4M8 23h8"/></svg></button>
-    <textarea id="txt" rows="1" placeholder="بنویس یا میکروفون رو بزن…" dir="auto" enterkeyhint="send"></textarea>
-    <button class="ib" id="send" aria-label="ارسال" style="width:46px;height:46px;border-radius:50%"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></button>
-    <button id="mic" aria-label="شروع گفتگوی صوتی"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></button>
+  <div id="composer">
+    <div id="composerTools" aria-label="ابزارهای پیام">
+      <button class="toolBtn" id="attach" aria-label="افزودن تصویر">＋</button>
+      <button class="toolBtn" id="toolSearch" data-mode="search" aria-pressed="false">⌁ جستجو</button>
+      <button class="toolBtn" id="toolThink" data-mode="think" aria-pressed="false">✦ فکر</button>
+      <button class="toolBtn" id="toolCanvas" data-mode="canvas" aria-pressed="false">▧ Canvas</button>
+    </div>
+    <div id="bar">
+      <button class="ib" id="btnMute" aria-label="قطع میکروفون" style="display:none"><svg viewBox="0 0 24 24"><path d="M1 1l22 22M9 9v3a3 3 0 0 0 5.1 2.1M15 9.3V4a3 3 0 0 0-5.9-.8M17 16.9A7 7 0 0 1 5 12v-2M19 10v2a7 7 0 0 0-.1 1.2M12 19v4M8 23h8"/></svg></button>
+      <textarea id="txt" rows="1" placeholder="پیامت رو بنویس…" dir="auto" enterkeyhint="send"></textarea>
+      <button class="ib" id="send" aria-label="ارسال" style="width:46px;height:46px;border-radius:50%"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></button>
+      <button id="mic" aria-label="شروع گفتگوی صوتی"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></button>
+    </div>
+    <div id="composerHint">Enter برای ارسال · Shift+Enter برای خط جدید</div>
   </div>
 </div>
-<input type="file" id="file" accept="image/*" hidden>
+<input type="file" id="file" accept="image/*" hidden><input type="file" id="multiFile" accept="image/*" multiple hidden>
 
 <div class="sheet" id="shSet"><div class="in">
   <h2>تنظیمات <button class="ib x" data-close>✕</button></h2>
@@ -815,11 +824,32 @@ function speak(text){
   }catch(e){}
 }
 
+/* ───────── enhanced composer ───────── */
+const composerModes = { search:false, think:false, canvas:false };
+function setComposerMode(mode){
+  composerModes[mode] = !composerModes[mode];
+  const b = document.querySelector('#tool' + mode[0].toUpperCase() + mode.slice(1));
+  if(b) b.setAttribute('aria-pressed', String(composerModes[mode]));
+  const active = Object.keys(composerModes).filter(k => composerModes[k]);
+  $('#composer').dataset.modes = active.join(',');
+  if(mode === 'canvas' && composerModes.canvas) toast('Canvas فعال شد؛ درخواست طراحی یا ایده‌پردازی را بنویس');
+}
+document.querySelectorAll('#composerTools .toolBtn[data-mode]').forEach(b => b.onclick = () => setComposerMode(b.dataset.mode));
+$('#attach').onclick = () => pickShot('photo');
+function buildComposerPrompt(t){
+  const hints=[];
+  if(composerModes.search) hints.push('[USER MODE: web search enabled — use the web_search tool when current information or sources are needed.]');
+  if(composerModes.think) hints.push('[USER MODE: think carefully before answering; prioritize accuracy and a clear conclusion.]');
+  if(composerModes.canvas) hints.push('[USER MODE: canvas — structure the response as a practical draft/design/code block when appropriate.]');
+  return hints.length ? hints.join('\n') + '\n' + t : t;
+}
+
 /* ───────── input wiring ───────── */
 function ask(t){
   if(!S.proxy && !S.key){ openSheet('shSet'); toast('اتصال API را در تنظیمات وارد کن'); return; }
+  const finalText = buildComposerPrompt(t);
   addMsg('u', t);
-  if(Live.ready){ Live.ub = null; Live.sendText(t); } else textChat(t);
+  if(Live.ready){ Live.ub = null; Live.sendText(finalText); } else textChat(finalText);
 }
 function submitText(){
   const t = $('#txt').value.trim(); if(!t) return;
