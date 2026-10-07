@@ -212,3 +212,21 @@ html.jarvis-active #jarvis-avatar{transform:scale(1.08);box-shadow:0 0 20px rgba
   50% { transform: translate(3px,1px) scaleY(1.06); }
   75% { transform: translate(-2px,0) scaleY(.92); }
 }
+
+
+/* Final avatar visibility fix */
+#stage {
+  position: relative;
+}
+#jarvis-react-avatar {
+  position: relative !important;
+  z-index: 10 !important;
+  min-width: 48px;
+  min-height: 48px;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+#jarvis-react-avatar > * {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
