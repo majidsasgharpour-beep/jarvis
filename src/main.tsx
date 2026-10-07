@@ -6,13 +6,5 @@ import "./index.css";
 const mount = document.getElementById("jarvis-react-avatar");
 
 if (mount) {
-  createRoot(mount).render(
-    <Avatar
-      blinking
-      color="blue"
-      size="lg"
-      shape="squircle"
-      className="jarvis-react-avatar"
-    />
-  );
+  createRoot(mount).render(<Avatar />);
 }
