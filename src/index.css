@@ -1,8 +1,0 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Keep the supplied avatar at its native component dimensions. */
-#jarvis-react-avatar {
-  display: contents;
-}
