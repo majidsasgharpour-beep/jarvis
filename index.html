@@ -22,6 +22,10 @@
   <div class="progress" aria-hidden="true"></div>
 
   <header class="hero">
+    <div class="glow" aria-hidden="true"></div>
+    <div class="orb orb-a" aria-hidden="true"></div>
+    <div class="orb orb-b" aria-hidden="true"></div>
+
     <div class="wrap">
       <nav class="topbar" aria-label="منوی اصلی">
         <a class="brand" href="#">پیشران</a>
@@ -55,6 +59,11 @@
           </div>
         </div>
       </div>
+
+      <a class="scroll-cue" href="#manifesto" aria-label="ادامه‌ی صفحه">
+        <span>اسکرول کن</span>
+        <span class="cue-line" aria-hidden="true"></span>
+      </a>
     </div>
   </header>
 
@@ -65,6 +74,12 @@
   </div>
 
   <main>
+    <section class="manifesto" id="manifesto" aria-label="چرا مدرک کافی نیست">
+      <div class="manifesto-pin">
+        <p class="manifesto-text">چهار سال درس خوندی و مدرکت رو گرفتی. اما ابزارهایی که بازار امروز باهاشون کار می‌کنه، توی هیچ سرفصلی نبود. هوش مصنوعی هر ماه سریع‌تر می‌شه و فاصله‌ی بین مدرک و مهارت بیشتر. کسی که یاد بگیره باهاش کار کنه، جلو می‌افته.</p>
+      </div>
+    </section>
+
     <section class="gap" aria-labelledby="gap-title">
       <div class="wrap narrow">
         <h2 id="gap-title">مدرک و مهارت یکی نیستن</h2>
@@ -100,38 +115,66 @@
     </section>
 
     <section class="ai" id="timeline" aria-labelledby="ai-title">
-      <canvas class="net" aria-hidden="true"></canvas>
-      <div class="wrap narrow">
+      <div class="wrap narrow ai-head">
         <h2 id="ai-title">هوش مصنوعی تا امروز چه کار کرده؟</h2>
         <p class="ai-intro">این‌ها شایعه نیست. همه‌شون ثبت شده‌ان.</p>
+      </div>
 
-        <ol class="timeline">
-          <li>
-            <span class="year">۲۰۱۶</span>
-            <p>برنامه‌ی AlphaGo در بازی گو، لی‌سدول، یکی از بهترین بازیکنان تاریخ، رو ۴ بر ۱ شکست داد. بازی‌ای که می‌گفتن ماشین‌ها سال‌ها ازش دورن.</p>
-          </li>
-          <li>
-            <span class="year">۲۰۲۰</span>
-            <p>AlphaFold 2 در رقابت بین‌المللی پیش‌بینی ساختار پروتئین، مسئله‌ای رو حل کرد که زیست‌شناس‌ها بیش از پنجاه سال باهاش درگیر بودن.</p>
-          </li>
-          <li>
-            <span class="year">۲۰۲۲</span>
-            <p>ChatGPT عمومی شد و ابزارهای ساخت تصویر مثل Midjourney و Stable Diffusion همه‌گیر شدن. هوش مصنوعی از آزمایشگاه اومد توی کار روزمره.</p>
-          </li>
-          <li>
-            <span class="year">۲۰۲۴</span>
-            <p>دو جایزه‌ی نوبل برای کارهای مرتبط با هوش مصنوعی: نوبل فیزیک برای پایه‌های شبکه‌های عصبی و نوبل شیمی برای AlphaFold و طراحی پروتئین.</p>
-          </li>
-          <li>
-            <span class="year">۲۰۲۵</span>
-            <p>مدل‌های Google DeepMind و OpenAI در المپیاد جهانی ریاضی به سطح مدال طلا رسیدن.</p>
-          </li>
-          <li>
-            <span class="year year-now">امروز</span>
-            <p>نوشتن کد، ساخت تصویر و ویدیو، ترجمه و تحلیل داده در چند ثانیه، و بخشی از کار روزمره‌ی میلیون‌ها نفر.</p>
-          </li>
-        </ol>
+      <div class="hscroll" id="hscroll">
+        <div class="hpin">
+          <canvas class="net" aria-hidden="true"></canvas>
+          <p class="hhint" aria-hidden="true">با اسکرول جلو برو</p>
 
+          <div class="htrack">
+            <article class="hcard">
+              <span class="year">۲۰۱۶</span>
+              <div>
+                <h3>AlphaGo</h3>
+                <p>برنامه‌ی AlphaGo در بازی گو، لی‌سدول، یکی از بهترین بازیکنان تاریخ، رو ۴ بر ۱ شکست داد. بازی‌ای که می‌گفتن ماشین‌ها سال‌ها ازش دورن.</p>
+              </div>
+            </article>
+            <article class="hcard">
+              <span class="year">۲۰۲۰</span>
+              <div>
+                <h3>AlphaFold 2</h3>
+                <p>در رقابت بین‌المللی پیش‌بینی ساختار پروتئین، مسئله‌ای رو حل کرد که زیست‌شناس‌ها بیش از پنجاه سال باهاش درگیر بودن.</p>
+              </div>
+            </article>
+            <article class="hcard">
+              <span class="year">۲۰۲۲</span>
+              <div>
+                <h3>ChatGPT و ساخت تصویر</h3>
+                <p>ChatGPT عمومی شد و ابزارهای ساخت تصویر مثل Midjourney و Stable Diffusion همه‌گیر شدن. هوش مصنوعی از آزمایشگاه اومد توی کار روزمره.</p>
+              </div>
+            </article>
+            <article class="hcard">
+              <span class="year">۲۰۲۴</span>
+              <div>
+                <h3>دو جایزه‌ی نوبل</h3>
+                <p>نوبل فیزیک برای پایه‌های شبکه‌های عصبی و نوبل شیمی برای AlphaFold و طراحی پروتئین، هر دو برای کارهای مرتبط با هوش مصنوعی.</p>
+              </div>
+            </article>
+            <article class="hcard">
+              <span class="year">۲۰۲۵</span>
+              <div>
+                <h3>المپیاد جهانی ریاضی</h3>
+                <p>مدل‌های Google DeepMind و OpenAI در المپیاد جهانی ریاضی به سطح مدال طلا رسیدن.</p>
+              </div>
+            </article>
+            <article class="hcard">
+              <span class="year year-now">امروز</span>
+              <div>
+                <h3>کار روزمره‌ی میلیون‌ها نفر</h3>
+                <p>نوشتن کد، ساخت تصویر و ویدیو، ترجمه و تحلیل داده در چند ثانیه. و تو هنوز می‌تونی از این مسیر عقب نمونی.</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="hbar" aria-hidden="true"><span class="hbar-fill"></span></div>
+        </div>
+      </div>
+
+      <div class="wrap narrow ai-foot">
         <p class="sources">منابع:
           <a href="https://www.ebi.ac.uk/about/news/alphafold-wins-nobel-prize-chemistry-2024/" rel="noopener">EMBL-EBI درباره‌ی نوبل شیمی ۲۰۲۴</a>،
           <a href="https://www.euronews.com/2025/07/22/did-google-deepmind-or-openai-win-gold-at-the-worlds-most-prestigious-math-competition" rel="noopener">Euronews درباره‌ی المپیاد ریاضی ۲۰۲۵</a>
@@ -152,23 +195,23 @@
           <p>از صفر شروع می‌کنیم و با پروژه‌ی خودت تموم می‌کنیم.</p>
         </div>
         <ol class="modules">
-          <li>
+          <li style="--i:0">
             <h3>آشنایی با ابزارها و پرامپت‌نویسی</h3>
             <p>بفهم مدل‌ها چطور جواب می‌دن و چطور باید باهاشون حرف زد.</p>
           </li>
-          <li>
+          <li style="--i:1">
             <h3>هوش مصنوعی برای کار روزمره</h3>
             <p>نوشتن، خلاصه‌سازی، ترجمه و تحلیل داده در چند ثانیه.</p>
           </li>
-          <li>
+          <li style="--i:2">
             <h3>ساخت تصویر و ویدیو</h3>
             <p>از ایده تا خروجی آماده برای شبکه‌های اجتماعی و کسب‌وکار.</p>
           </li>
-          <li>
+          <li style="--i:3">
             <h3>خودکارسازی کارها</h3>
             <p>کارهای تکراری رو به یه سیستم بسپار.</p>
           </li>
-          <li>
+          <li style="--i:4">
             <h3>پروژه‌ی نهایی</h3>
             <p>یه نمونه‌کار واقعی که بشه نشونش داد.</p>
           </li>

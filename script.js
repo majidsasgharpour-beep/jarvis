@@ -7,8 +7,11 @@ const CONFIG = {
   "use strict";
 
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const finePointer = window.matchMedia("(pointer: fine)").matches;
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const faNum = new Intl.NumberFormat("fa-IR", { useGrouping: false });
+  const root = document.documentElement;
+  let ticking = false;
 
   /* ---------- Hero headline: word by word ---------- */
   const h1 = document.querySelector(".hero h1");
@@ -47,100 +50,39 @@ const CONFIG = {
     setTimeout(tick, 2600);
   }
 
-  /* ---------- Marquee ---------- */
+  /* ---------- Marquee: duplicate for a seamless loop ---------- */
   const track = document.querySelector(".marquee-track");
   if (track) track.innerHTML += track.innerHTML;
 
-  /* ---------- Reveal on scroll ---------- */
-  const targets =
-    ".gap h2,.compare tbody tr,.aside,.ai h2,.ai-intro,.timeline li,.sources,.bridge," +
-    ".classes h2,.classes-grid > div > p,.modules li,.register h2,.register-grid > div > p,.form";
-  const revealEls = Array.from(document.querySelectorAll(targets));
-  const seen = new Map();
-  revealEls.forEach((el) => {
-    el.setAttribute("data-reveal", "");
-    if (el.matches(".compare tbody tr,.modules li")) {
-      const n = seen.get(el.parentElement) || 0;
-      seen.set(el.parentElement, n + 1);
-      el.style.setProperty("--d", Math.min(n, 5) * 100 + "ms");
-    }
-  });
-
-  function countUp(el) {
-    const end = parseInt(el.getAttribute("data-year"), 10);
-    if (!end || reduce) return;
-    const start = end - 60;
-    const t0 = performance.now();
-    const dur = 1000;
-    const step = (now) => {
-      const p = clamp((now - t0) / dur, 0, 1);
-      const eased = 1 - Math.pow(1 - p, 3);
-      el.textContent = faNum.format(Math.round(start + (end - start) * eased));
-      if (p < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
+  /* ---------- Hero: cursor glow and magnetic buttons ---------- */
+  const hero = document.querySelector(".hero");
+  if (hero && finePointer && !reduce) {
+    hero.addEventListener("pointermove", (e) => {
+      const r = hero.getBoundingClientRect();
+      hero.style.setProperty("--gx", e.clientX - r.left + "px");
+      hero.style.setProperty("--gy", e.clientY - r.top + "px");
+    });
   }
-
-  document.querySelectorAll(".timeline .year").forEach((el) => {
-    const m = toEnglishDigits(el.textContent.trim()).match(/^\d{4}$/);
-    if (m) el.setAttribute("data-year", m[0]);
-  });
-
-  function show(el) {
-    el.classList.add("in");
-    const y = el.querySelector && el.querySelector(".year[data-year]");
-    if (y) countUp(y);
+  if (finePointer && !reduce) {
+    document.querySelectorAll(".btn").forEach((btn) => {
+      btn.addEventListener("pointermove", (e) => {
+        const r = btn.getBoundingClientRect();
+        const dx = (e.clientX - (r.left + r.width / 2)) * 0.22;
+        const dy = (e.clientY - (r.top + r.height / 2)) * 0.3;
+        btn.style.setProperty("--mx", dx.toFixed(1) + "px");
+        btn.style.setProperty("--my", dy.toFixed(1) + "px");
+      });
+      btn.addEventListener("pointerleave", () => {
+        btn.style.setProperty("--mx", "0px");
+        btn.style.setProperty("--my", "0px");
+      });
+    });
   }
-
-  if ("IntersectionObserver" in window && !reduce) {
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            show(e.target);
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -6% 0px" }
-    );
-    revealEls.forEach((el) => io.observe(el));
-  } else {
-    revealEls.forEach((el) => el.classList.add("in"));
-  }
-
-  /* ---------- Scroll progress and timeline line ---------- */
-  const timeline = document.querySelector(".timeline");
-  let ticking = false;
-  function onScroll() {
-    ticking = false;
-    const doc = document.documentElement;
-    const max = doc.scrollHeight - window.innerHeight;
-    doc.style.setProperty("--sp", max > 0 ? clamp(window.scrollY / max, 0, 1).toFixed(4) : 0);
-    if (timeline) {
-      const r = timeline.getBoundingClientRect();
-      const p = clamp((window.innerHeight * 0.62 - r.top) / r.height, 0, 1);
-      timeline.style.setProperty("--tp", p.toFixed(4));
-    }
-  }
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(onScroll);
-      }
-    },
-    { passive: true }
-  );
-  window.addEventListener("resize", onScroll);
-  onScroll();
 
   /* ---------- Diploma tilt ---------- */
-  const hero = document.querySelector(".hero");
   const art = document.querySelector(".art");
   const tilt = document.querySelector(".art-tilt");
-  if (hero && art && tilt && !reduce && window.matchMedia("(pointer: fine)").matches) {
+  if (hero && art && tilt && !reduce && finePointer) {
     hero.addEventListener("pointermove", (e) => {
       const r = art.getBoundingClientRect();
       const dx = (e.clientX - (r.left + r.width / 2)) / window.innerWidth;
@@ -154,10 +96,157 @@ const CONFIG = {
     });
   }
 
-  /* ---------- Neural network canvas ---------- */
+  /* ---------- Count-up for years ---------- */
+  function countUp(el) {
+    const end = parseInt(el.getAttribute("data-year"), 10);
+    if (!end || reduce) return;
+    const start = end - 60;
+    const t0 = performance.now();
+    const step = (now) => {
+      const p = clamp((now - t0) / 900, 0, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = faNum.format(Math.round(start + (end - start) * eased));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  document.querySelectorAll(".hcard .year").forEach((el) => {
+    const m = toEnglishDigits(el.textContent.trim()).match(/^\d{4}$/);
+    if (m) el.setAttribute("data-year", m[0]);
+  });
+
+  /* ---------- Manifesto: words light up with scroll ---------- */
+  const manifesto = document.querySelector(".manifesto");
+  const mText = document.querySelector(".manifesto-text");
+  let mWords = [];
+  if (manifesto && mText && !reduce) {
+    const highlight = new Set(["مهارت", "هوش", "مصنوعی", "جلو", "مدرک"]);
+    const full = mText.textContent.trim();
+    mText.setAttribute("aria-label", full);
+    mText.innerHTML = full
+      .split(/\s+/)
+      .map((w) => '<span class="mw' + (highlight.has(w.replace(/[.،]/g, "")) ? " hl" : "") + '" aria-hidden="true">' + w + "</span>")
+      .join(" ");
+    mWords = Array.from(mText.querySelectorAll(".mw"));
+  }
+
+  /* ---------- Horizontal timeline ---------- */
+  const hs = document.getElementById("hscroll");
+  let htrack = null;
+  let hcards = [];
+  let hdist = 0;
+  let htotal = 0;
+  if (hs && !reduce) {
+    htrack = hs.querySelector(".htrack");
+    hcards = Array.from(htrack.children);
+    const layout = () => {
+      hdist = Math.max(0, htrack.offsetWidth - window.innerWidth);
+      htotal = hdist + window.innerHeight * 1.3;
+      hs.style.height = htotal + "px";
+      update();
+    };
+    window.addEventListener("resize", layout);
+    window.addEventListener("load", layout);
+    if ("ResizeObserver" in window) new ResizeObserver(layout).observe(htrack);
+    layout();
+  }
+
+  /* ---------- Scroll handler ---------- */
+  function update() {
+    ticking = false;
+    const vh = window.innerHeight;
+    const y = window.scrollY;
+    const max = root.scrollHeight - vh;
+    root.style.setProperty("--sp", max > 0 ? clamp(y / max, 0, 1).toFixed(4) : 0);
+
+    if (y < vh * 1.5 && hero) hero.style.setProperty("--sy", Math.round(y));
+
+    if (mWords.length) {
+      const r = manifesto.getBoundingClientRect();
+      const span = manifesto.offsetHeight - vh;
+      const p = clamp(-r.top / span, 0, 1);
+      const n = mWords.length;
+      for (let i = 0; i < n; i++) {
+        const t = clamp(p * (n + 3) - i, 0, 1);
+        mWords[i].style.opacity = (0.16 + 0.84 * t).toFixed(3);
+      }
+    }
+
+    if (htrack && htotal > 0) {
+      const r = hs.getBoundingClientRect();
+      const p = clamp(-r.top / (htotal - vh), 0, 1);
+      htrack.style.transform = "translate3d(" + (p * hdist).toFixed(1) + "px,0,0)";
+      hs.style.setProperty("--hp", p.toFixed(4));
+      const focus = window.innerWidth * (0.7 - 0.45 * p);
+      let best = -1;
+      let bestD = Infinity;
+      hcards.forEach((c, i) => {
+        const cr = c.getBoundingClientRect();
+        const d = Math.abs(cr.left + cr.width / 2 - focus);
+        if (d < bestD) {
+          bestD = d;
+          best = i;
+        }
+      });
+      hcards.forEach((c, i) => {
+        const on = i === best && r.top < vh && r.bottom > 0;
+        if (on !== c.classList.contains("on")) c.classList.toggle("on", on);
+        if (on && !c._counted) {
+          c._counted = true;
+          const yEl = c.querySelector(".year[data-year]");
+          if (yEl) countUp(yEl);
+        }
+      });
+    }
+  }
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    },
+    { passive: true }
+  );
+  window.addEventListener("resize", update);
+  update();
+
+  /* ---------- Reveal on scroll ---------- */
+  const targets =
+    ".gap h2,.compare tbody tr,.aside,.ai-head h2,.ai-intro,.sources,.bridge," +
+    ".classes h2,.classes-grid > div > p,.register h2,.register-grid > div > p,.form";
+  const revealEls = Array.from(document.querySelectorAll(targets));
+  const seen = new Map();
+  revealEls.forEach((el) => {
+    el.setAttribute("data-reveal", "");
+    if (el.matches(".compare tbody tr")) {
+      const n = seen.get(el.parentElement) || 0;
+      seen.set(el.parentElement, n + 1);
+      el.style.setProperty("--d", n * 100 + "ms");
+    }
+  });
+  if ("IntersectionObserver" in window && !reduce) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("in");
+            io.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -6% 0px" }
+    );
+    revealEls.forEach((el) => io.observe(el));
+  } else {
+    revealEls.forEach((el) => el.classList.add("in"));
+  }
+
+  /* ---------- Neural network canvas (inside the pinned timeline) ---------- */
   const cv = document.querySelector(".net");
-  const aiSection = document.querySelector(".ai");
-  if (cv && aiSection && !reduce) {
+  const pin = cv ? cv.parentElement : null;
+  if (cv && pin && !reduce) {
     const ctx = cv.getContext("2d");
     let w = 0;
     let h = 0;
@@ -200,7 +289,7 @@ const CONFIG = {
           const b = nodes[j];
           const d = Math.hypot(a.x - b.x, a.y - b.y);
           if (d < D) {
-            ctx.strokeStyle = "rgba(255,255,255," + ((1 - d / D) * 0.32).toFixed(3) + ")";
+            ctx.strokeStyle = "rgba(255,255,255," + ((1 - d / D) * 0.3).toFixed(3) + ")";
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
@@ -227,19 +316,18 @@ const CONFIG = {
       requestAnimationFrame(frame);
     };
 
-    aiSection.addEventListener("pointermove", (e) => {
+    pin.addEventListener("pointermove", (e) => {
       const r = cv.getBoundingClientRect();
       mouse.x = e.clientX - r.left;
       mouse.y = e.clientY - r.top;
     });
-    aiSection.addEventListener("pointerleave", () => {
+    pin.addEventListener("pointerleave", () => {
       mouse.x = -1000;
       mouse.y = -1000;
     });
 
     resize();
-    if ("ResizeObserver" in window) new ResizeObserver(resize).observe(aiSection);
-    else window.addEventListener("resize", resize);
+    window.addEventListener("resize", resize);
 
     if ("IntersectionObserver" in window) {
       new IntersectionObserver((entries) => {
@@ -250,7 +338,7 @@ const CONFIG = {
         } else if (!vis) {
           running = false;
         }
-      }).observe(aiSection);
+      }).observe(pin);
     } else {
       running = true;
       requestAnimationFrame(frame);
