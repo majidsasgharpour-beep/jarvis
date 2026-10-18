@@ -121,7 +121,17 @@ h1 {
   max-width: 34rem;
   font-size: 1.15rem;
   color: var(--ink-soft);
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
+}
+.ask { font-size: 1.15rem; font-weight: 700; margin-bottom: 2rem; }
+.typed { color: var(--cobalt); }
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-inline: 0.15rem;
+  vertical-align: -0.2em;
+  background: var(--ink);
 }
 .actions {
   display: flex;
@@ -138,6 +148,7 @@ h1 {
   border: 1px solid var(--paper-edge);
   box-shadow: 0 22px 40px -26px rgba(16, 26, 51, 0.5);
   transform: rotate(1.5deg);
+  animation: drop 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.15) 0.25s both, thud 0.5s ease-out 1.62s;
 }
 .diploma-body {
   padding: 2.25rem 1.75rem 2.5rem;
@@ -195,7 +206,16 @@ h1 {
   background: rgba(247, 248, 250, 0.35);
   mix-blend-mode: multiply;
   transform: rotate(-9deg);
-  animation: slam 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) 0.7s both;
+  animation: slam 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) 1.2s both;
+}
+.stamp::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border: 3px solid var(--stamp);
+  border-radius: 0.5rem;
+  opacity: 0;
+  animation: ring 0.8s ease-out 1.55s;
 }
 @keyframes slam {
   from { transform: rotate(-16deg) scale(2.6); opacity: 0; }
@@ -204,7 +224,7 @@ h1 {
 }
 
 /* Gap section */
-.gap { padding-block: 4.5rem 6rem; }
+.gap { padding-block: 4.5rem 6rem; overflow-x: clip; }
 .gap h2 { margin-bottom: 2rem; }
 
 .compare {
@@ -249,6 +269,8 @@ h1 {
   margin-top: -2.5rem;
   padding-block: 7.5rem 5.5rem;
   clip-path: polygon(0 2.5rem, 100% 0, 100% 100%, 0 100%);
+  position: relative;
+  isolation: isolate;
 }
 .ai h2 { margin-bottom: 0.75rem; }
 .ai-intro { font-size: 1.15rem; margin-bottom: 2.5rem; color: rgba(255, 255, 255, 0.85); }
@@ -394,8 +416,163 @@ h1 {
   .form { padding: 1.5rem; }
 }
 
+/* Motion */
+.progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  height: 4px;
+  background: var(--signal);
+  transform-origin: right center;
+  transform: scaleX(var(--sp, 0));
+  pointer-events: none;
+}
+
+.w {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-block: 0.14em;
+  margin-block: -0.14em;
+}
+.wi {
+  display: inline-block;
+  transform: translateY(112%);
+  animation: rise 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: calc(var(--i) * 85ms + 120ms);
+}
+
+.js .caret { animation: blink 1s steps(1) infinite; }
+
+.art { perspective: 900px; }
+.art-tilt {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.18s ease-out;
+}
+.art-float { animation: float 7s ease-in-out 2.2s infinite alternate; }
+
+.hero .btn:not(:hover) { animation: pulse 2.4s ease-out 2s infinite; }
+
+.marquee {
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--signal);
+  white-space: nowrap;
+}
+.marquee-track {
+  display: inline-flex;
+  width: max-content;
+  padding-block: 0.6rem;
+}
+.marquee span {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.6rem;
+  padding-inline-end: 2.6rem;
+  font-family: var(--display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.marquee span::after {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  background: #fff;
+  transform: rotate(45deg);
+}
+.js .marquee-track { animation: scroll 32s linear infinite; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+
+.net {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+}
+
+.js [data-reveal] {
+  opacity: 0;
+  transform: translate(var(--tx, 0), var(--ty, 30px));
+  transition: opacity 0.75s cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0ms),
+              transform 0.75s cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0ms);
+}
+.js [data-reveal].in { opacity: 1; transform: none; }
+.compare tbody tr { --tx: -44px; --ty: 0px; }
+
+.timeline { position: relative; }
+.timeline::before, .timeline::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: -0.95rem;
+  width: 3px;
+}
+.timeline::before { background: rgba(255, 255, 255, 0.25); }
+.timeline::after {
+  background: var(--signal);
+  transform-origin: top;
+  transform: scaleY(var(--tp, 0));
+}
+.timeline li { position: relative; }
+.timeline li::before {
+  content: "";
+  position: absolute;
+  inset-inline-end: -1.2rem;
+  top: 2rem;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background: var(--cobalt);
+  border: 3px solid rgba(255, 255, 255, 0.6);
+  transform: scale(0.5);
+  transition: transform 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) 0.2s, background 0.3s ease 0.2s;
+}
+.timeline li.in::before { background: var(--signal); border-color: var(--signal); transform: scale(1.1); }
+
+.modules li { transition: background-color 0.2s ease; }
+.modules li:hover { background-color: rgba(32, 56, 240, 0.07); }
+.modules li::before { transition: transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1); }
+.modules li:hover::before { transform: scale(1.25); }
+
+.field.shake { animation: shake 0.4s ease; }
+
+@keyframes drop {
+  from { opacity: 0; transform: translateY(-90px) rotate(-8deg); }
+  to   { opacity: 1; transform: rotate(1.5deg); }
+}
+@keyframes thud {
+  0%   { transform: rotate(1.5deg) translateY(0); }
+  30%  { transform: rotate(0.5deg) translateY(8px); }
+  60%  { transform: rotate(2.2deg) translateY(-2px); }
+  100% { transform: rotate(1.5deg) translateY(0); }
+}
+@keyframes ring {
+  from { opacity: 0.85; transform: scale(1); }
+  to   { opacity: 0; transform: scale(1.45); }
+}
+@keyframes float { to { transform: translateY(-10px); } }
+@keyframes rise { to { transform: none; } }
+@keyframes blink { 50% { opacity: 0; } }
+@keyframes scroll { to { transform: translateX(50%); } }
+@keyframes pulse {
+  from { box-shadow: 0 0 0 0 rgba(255, 210, 63, 0.75); }
+  to   { box-shadow: 0 0 0 18px rgba(255, 210, 63, 0); }
+}
+@keyframes shake {
+  20% { transform: translateX(8px); }
+  40% { transform: translateX(-8px); }
+  60% { transform: translateX(5px); }
+  80% { transform: translateX(-3px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .stamp { animation: none; }
-  .btn { transition: none; }
+  .stamp, .stamp::after, .diploma, .art-float, .hero .btn, .caret,
+  .js .marquee-track, .wi, .field.shake { animation: none; }
+  .wi { transform: none; }
+  .btn, .art-tilt, .timeline li::before, .modules li, .modules li::before { transition: none; }
+  .js [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .net { display: none; }
 }

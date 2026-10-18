@@ -16,8 +16,10 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@500;700&family=Vazirmatn:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@500;700&family=Vazirmatn:wght@400;500;700&display=swap"></noscript>
   <link rel="stylesheet" href="style.css">
+  <script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
+  <div class="progress" aria-hidden="true"></div>
 
   <header class="hero">
     <div class="wrap">
@@ -30,24 +32,37 @@
         <div class="hero-copy">
           <h1>مدرک داری، ولی بازار دنبال چیز دیگه‌ای می‌گرده.</h1>
           <p class="lead">چهار سال درس خوندن هنوز ارزش داره. ولی کارفرما امروز اول می‌پرسه: با هوش مصنوعی کار می‌کنی؟ جواب این سؤال رو توی کلاس درس پیدا نمی‌کنی.</p>
+          <p class="ask">کارفرما می‌پرسه: بلدی با <span class="typed" id="typed">هوش مصنوعی</span><span class="caret" aria-hidden="true"></span> کار کنی؟</p>
           <div class="actions">
             <a class="btn" href="#register">ثبت‌نام در کلاس‌ها</a>
             <a class="btn-link" href="#timeline">ببین هوش مصنوعی چه کرده</a>
           </div>
         </div>
 
-        <figure class="diploma" aria-label="تصویر یک گواهی پایان تحصیلات که مهر «کافی نیست» روی آن خورده است">
-          <div class="diploma-body">
-            <p class="diploma-title">گواهی پایان تحصیلات</p>
-            <p class="diploma-text">این برگه تأیید می‌کند صاحبش چهار سال درس خوانده، امتحان داده و جزوه نوشته است.</p>
-            <p class="diploma-name">نام شما</p>
-            <div class="seal" aria-hidden="true"><span>۴ سال</span></div>
+        <div class="art">
+          <div class="art-tilt">
+            <div class="art-float">
+              <figure class="diploma" aria-label="تصویر یک گواهی پایان تحصیلات که مهر «کافی نیست» روی آن خورده است">
+                <div class="diploma-body">
+                  <p class="diploma-title">گواهی پایان تحصیلات</p>
+                  <p class="diploma-text">این برگه تأیید می‌کند صاحبش چهار سال درس خوانده، امتحان داده و جزوه نوشته است.</p>
+                  <p class="diploma-name">نام شما</p>
+                  <div class="seal" aria-hidden="true"><span>۴ سال</span></div>
+                </div>
+                <div class="stamp" aria-hidden="true">کافی نیست</div>
+              </figure>
+            </div>
           </div>
-          <div class="stamp" aria-hidden="true">کافی نیست</div>
-        </figure>
+        </div>
       </div>
     </div>
   </header>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>نوشتن</span><span>کدنویسی</span><span>ترجمه</span><span>تحلیل داده</span><span>ساخت تصویر</span><span>ساخت ویدیو</span><span>طراحی</span><span>خلاصه‌سازی</span><span>پژوهش</span><span>آموزش</span>
+    </div>
+  </div>
 
   <main>
     <section class="gap" aria-labelledby="gap-title">
@@ -85,6 +100,7 @@
     </section>
 
     <section class="ai" id="timeline" aria-labelledby="ai-title">
+      <canvas class="net" aria-hidden="true"></canvas>
       <div class="wrap narrow">
         <h2 id="ai-title">هوش مصنوعی تا امروز چه کار کرده؟</h2>
         <p class="ai-intro">این‌ها شایعه نیست. همه‌شون ثبت شده‌ان.</p>
